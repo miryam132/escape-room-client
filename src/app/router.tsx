@@ -8,10 +8,11 @@ import NewRoom from "../features/admin/NewRoom";
 import EditRoom from "../features/admin/EditRoom";
 import NotFound from "../components/common/NotFound";
 import RoomPage from "../features/rooms/RoomsPage";
-
+import RegisterPage from "../features/auth/registerPage";
 export function AppRoutes() {
     return (
     <Routes>
+      <Route path="/register" element={<RegisterPage />} />
           <Route path="/" element={<Home />} />
           <Route path="/rooms" element={<RoomPage />} />
           <Route path="/rooms/:id" element={<RoomDetailsPage />} />
