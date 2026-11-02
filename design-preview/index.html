@@ -5,304 +5,295 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>תצוגה מקדימה – עיצוב חדרי בריחה</title>
 <!--
-  תצוגה מקדימה עצמאית: אין קישורים חיצוניים (גופנים / ספריות),
-  כדי שתיפתח בכל מקום, גם עם סינון אינטרנט. פותחים בדפדפן ישירות מהתיקייה.
-  התמונות נטענות מ-public/images של הפרויקט.
+  תצוגה מקדימה עצמאית: אין שום קישור חיצוני (גופנים / ספריות / CDN).
+  פותחים בדפדפן ישירות מהתיקייה. התמונות נטענות מ-public/images של הפרויקט.
 -->
 <style>
-/* ============ TOKENS ============ */
+/* ================= TOKENS ================= */
 :root{
-  --bg:        #EFDCD6;   /* ורוד-קלף */
-  --bg-2:      #E4C7BF;
-  --surface:   rgba(255,248,244,.55);
-  --surface-strong: #F7ECE8;
-  --ink:       #5A1F1F;   /* בורדו כהה – טקסט ראשי */
-  --ink-2:     #8A5A55;   /* טקסט משני */
-  --line:      rgba(90,31,31,.18);
+  color-scheme:dark;
+  --night:#0c0b0e; --night-2:#141217; --night-3:#1b1820;
+  --hair:#2a2630;  --paper:#ebe5d8;   --mist:#8f8a93;
 
-  --easy:   #2E8B6E;
-  --medium: #C17D24;
-  --hard:   #B23838;
-  --info:   #4E58C9;
-  --accent: var(--ink);
+  --gold:#c9a86a;  --ember:#f0727a;   --teal:#4fb3a9;
 
-  --radius: 14px;
-  --radius-sm: 8px;
-  --shadow: 0 18px 40px -18px rgba(90,31,31,.45);
+  --easy:#7cc9a0;  --medium:#e0a84f;  --hard:#f0727a;  --info:#8b95ff;
 
-  --font: "Segoe UI", "Assistant", "Heebo", Tahoma, Arial, sans-serif;
-  --mono: "Consolas", "Courier New", monospace;
+  --f-display:"Frank Ruhl Libre","David","Times New Roman",serif;
+  --f-body:"Assistant","Segoe UI",Tahoma,Arial,sans-serif;
+  --f-mono:"JetBrains Mono","Consolas","Courier New",monospace;
 
-  --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .12  0 0 0 0 .12  0 0 0 1.4 -.35'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-  --grain-alpha: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 2.2 -.6'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --ease:cubic-bezier(.2,.7,.2,1);
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --noise-alpha:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.15' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 2.4 -.7'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-
 *{box-sizing:border-box}
-html,body{margin:0}
-body{
-  font-family:var(--font);
-  color:var(--ink);
-  background:
-    radial-gradient(120% 90% at 85% 10%, #F6E7E2 0%, transparent 55%),
-    radial-gradient(90% 80% at 0% 100%, var(--bg-2) 0%, transparent 60%),
-    var(--bg);
-  min-height:100vh;
-  line-height:1.55;
-}
-/* שכבת גרעיניות קבועה על כל המסך */
-body::after{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:999;
-  background-image:var(--grain);opacity:.55;mix-blend-mode:multiply;
-}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--night);color:var(--paper);font:15px/1.6 var(--f-body);overflow-x:hidden}
+button{font-family:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:1px solid var(--gold);outline-offset:3px}
+.label{font-size:11px;font-weight:700;letter-spacing:.3em;color:var(--mist)}
 
-button{font:inherit;color:inherit;cursor:pointer}
-a{color:inherit}
+/* גרעין קולנועי זז – על כל המסך */
+.film{position:fixed;inset:-50%;pointer-events:none;z-index:90;opacity:.07;background-image:var(--noise);animation:film 1s steps(6) infinite}
+@keyframes film{0%,100%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-4%)}75%{transform:translate(-4%,-1%)}}
+
+/* פס התקדמות גלילה */
+.scrollbar{position:fixed;top:0;inset-inline:0;height:2px;z-index:95;background:linear-gradient(90deg,var(--teal),var(--gold),var(--ember));transform-origin:right;transform:scaleX(0)}
 
 /* ============ אפקט: גרעיניות מתפוגגת ============ */
-.dissolve{position:relative;display:inline-block;font-weight:900;letter-spacing:-.02em;line-height:1}
-.dissolve::before{                 /* "הזנב" שנמס לגרגירים */
-  content:attr(data-text);
-  position:absolute;inset:0;
-  color:currentColor;
-  transform:translateY(38%) scaleY(1.25);
-  transform-origin:top;
-  filter:url(#vblur);
-  -webkit-mask-image:var(--grain-alpha), linear-gradient(to bottom, #000 0%, rgba(0,0,0,.6) 35%, transparent 85%);
+.dissolve{position:relative;display:inline-block;isolation:isolate}
+.dissolve::after{
+  content:attr(data-text);position:absolute;inset:0;z-index:-1;color:currentColor;white-space:inherit;
+  transform:translateY(34%) scaleY(1.3);transform-origin:top;filter:url(#vblur);opacity:.8;
+  -webkit-mask-image:var(--noise-alpha),linear-gradient(#000 0%,rgba(0,0,0,.55) 35%,transparent 85%);
   -webkit-mask-composite:source-in;
-          mask-image:var(--grain-alpha), linear-gradient(to bottom, #000 0%, rgba(0,0,0,.6) 35%, transparent 85%);
-          mask-composite:intersect;
-  opacity:.85;z-index:-1;
+  mask-image:var(--noise-alpha),linear-gradient(#000 0%,rgba(0,0,0,.55) 35%,transparent 85%);
+  mask-composite:intersect;
 }
+/* הופעה גרעינית – הטקסט "מתגבש" מגרגירים מלמעלה למטה */
+.grain-in{
+  -webkit-mask-image:var(--noise-alpha),linear-gradient(#000 40%,transparent 60%);
+  -webkit-mask-size:140px 140px,100% 300%;-webkit-mask-repeat:repeat,no-repeat;
+  -webkit-mask-composite:source-over;
+  mask-image:var(--noise-alpha),linear-gradient(#000 40%,transparent 60%);
+  mask-size:140px 140px,100% 300%;mask-repeat:repeat,no-repeat;mask-composite:add;
+  -webkit-mask-position:0 0,0 100%;mask-position:0 0,0 100%;
+}
+.grain-in.in{animation:grainIn 1.6s var(--ease) forwards}
+@keyframes grainIn{to{-webkit-mask-position:0 0,0 0;mask-position:0 0,0 0}}
 
-/* ============ מעטפת דמו ============ */
-.demo-nav{
-  position:sticky;top:0;z-index:50;
-  display:flex;gap:6px;align-items:center;flex-wrap:wrap;
-  padding:10px 24px;
-  background:rgba(239,220,214,.82);backdrop-filter:blur(8px);
-  border-bottom:1px solid var(--line);
-}
-.demo-nav .tag{font-size:12px;color:var(--ink-2);margin-inline-end:12px}
-.demo-nav button{
-  border:1px solid var(--line);background:transparent;border-radius:999px;
-  padding:6px 14px;font-size:14px;
-}
-.demo-nav button[aria-pressed="true"]{background:var(--ink);color:var(--surface-strong);border-color:var(--ink)}
-.demo-nav .route{font-family:var(--mono);font-size:12px;color:var(--ink-2);margin-inline-start:auto;direction:ltr}
+/* הופעה בגלילה */
+.reveal{opacity:0;transform:translateY(34px);filter:blur(6px);transition:opacity .9s var(--ease),transform .9s var(--ease),filter .9s var(--ease);transition-delay:calc(var(--i,0)*110ms)}
+.reveal.in{opacity:1;transform:none;filter:none}
 
-.screen{display:none}
-.screen.active{display:block}
-.wrap{max-width:1180px;margin:0 auto;padding:32px 24px 80px}
+/* ============ ניווט דמו ============ */
+.demo-nav{position:sticky;top:0;z-index:80;display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:10px 24px;
+  background:rgba(12,11,14,.75);backdrop-filter:blur(10px);border-bottom:1px solid var(--hair)}
+.demo-nav .tag{font-size:11px;letter-spacing:.25em;color:var(--mist);margin-inline-end:12px}
+.demo-nav button{border:1px solid var(--hair);background:transparent;border-radius:999px;padding:6px 14px;font-size:13px;letter-spacing:.04em;transition:.2s}
+.demo-nav button:hover{border-color:var(--gold);color:var(--gold)}
+.demo-nav button[aria-pressed="true"]{background:var(--paper);color:var(--night);border-color:var(--paper)}
+.demo-nav .route{font:12px var(--f-mono);color:var(--mist);margin-inline-start:auto;direction:ltr}
+.screen{display:none}.screen.active{display:block;animation:screenIn .6s var(--ease)}
+@keyframes screenIn{from{opacity:0}}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
 
-/* ============ רכיבים בסיסיים ============ */
-.btn{
-  display:inline-flex;align-items:center;gap:8px;
-  border:0;border-radius:999px;padding:12px 26px;font-weight:700;font-size:16px;
-  background:var(--ink);color:var(--surface-strong);
-  box-shadow:var(--shadow);transition:transform .15s, box-shadow .15s;
-}
-.btn:hover{transform:translateY(-2px)}
-.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--ink);box-shadow:none}
-.btn.small{padding:7px 14px;font-size:14px}
-
-.badge{
-  display:inline-flex;align-items:center;gap:6px;
-  font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;
-  background:color-mix(in srgb, var(--c) 14%, transparent);color:var(--c);
-  border:1px solid color-mix(in srgb, var(--c) 35%, transparent);
-}
-.badge::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
-.easy{--c:var(--easy)} .medium{--c:var(--medium)} .hard{--c:var(--hard)} .info-c{--c:var(--info)}
-
-.card{
-  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
-  backdrop-filter:blur(6px);box-shadow:var(--shadow);
-}
-.eyebrow{font-size:13px;font-weight:800;letter-spacing:.18em;color:var(--ink-2)}
+/* ============ רכיבים ============ */
+.btn{display:inline-flex;align-items:center;gap:8px;font:700 14px var(--f-body);letter-spacing:.06em;padding:12px 24px;border-radius:999px;
+  border:1px solid var(--paper);background:var(--paper);color:var(--night);transition:background .2s,border-color .2s,transform .2s}
+.btn:hover{background:var(--gold);border-color:var(--gold);transform:translateY(-2px)}
+.btn.line{background:transparent;color:var(--paper);border-color:var(--hair)}
+.btn.line:hover{border-color:var(--gold);color:var(--gold)}
+.btn.sm{padding:8px 14px;font-size:13px}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;letter-spacing:.08em;padding:3px 10px;border-radius:999px;
+  color:var(--c);border:1px solid color-mix(in srgb,var(--c) 40%,transparent);background:color-mix(in srgb,var(--c) 10%,transparent)}
+.badge::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c)}
+.easy{--c:var(--easy)}.medium{--c:var(--medium)}.hard{--c:var(--hard)}.info-c{--c:var(--info)}
+.panel{background:var(--night-2);border:1px solid var(--hair);padding:16px;min-width:0}
+.panel h2{font:400 20px var(--f-display);margin:6px 0 12px}
 
 /* ============ דף הבית ============ */
-.hero{min-height:calc(100vh - 54px);display:grid;place-items:center;text-align:center;padding:40px 24px}
-.hero h1{font-size:clamp(70px,12vw,170px);margin:24px 0 90px}
-.hero p{max-width:520px;margin:0 auto 32px;color:var(--ink-2);font-size:19px}
+.hero{position:relative;min-height:calc(100vh - 50px);display:grid;place-items:center;text-align:center;overflow:hidden;padding:60px 24px}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.38;pointer-events:none;will-change:transform}
+.blob.a{width:520px;height:520px;background:var(--ember);top:-120px;right:-120px;animation:drift 16s ease-in-out infinite}
+.blob.b{width:460px;height:460px;background:var(--teal);bottom:-160px;left:-80px;animation:drift 19s ease-in-out infinite reverse}
+.blob.c{width:300px;height:300px;background:var(--gold);top:40%;left:45%;opacity:.18;animation:drift 22s ease-in-out infinite}
+@keyframes drift{50%{transform:translate(60px,-40px) scale(1.12)}}
+.torch{position:absolute;inset:0;pointer-events:none;background:radial-gradient(260px circle at var(--mx,50%) var(--my,40%),rgba(235,229,216,.09),transparent 70%)}
+.hero-in{position:relative;z-index:2}
+.hero h1{font:300 clamp(80px,13vw,190px)/1 var(--f-display);margin:22px 0 80px;letter-spacing:-.01em}
+.hero p{max-width:520px;margin:0 auto 34px;color:var(--mist);font-size:19px}
+.scroll-cue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:8px}
+.scroll-cue i{width:1px;height:46px;background:linear-gradient(var(--gold),transparent);animation:cue 2s ease-in-out infinite}
+@keyframes cue{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
 
-/* ============ רשימת חדרים ============ */
-.section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:28px}
-.section-head h2{font-size:56px;margin:0 0 30px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:40px 0 0}
+.step{background:var(--night-2);border:1px solid var(--hair);padding:40px 30px;position:relative;overflow:hidden}
+.step b{display:block;font:300 64px/1 var(--f-display);color:transparent;-webkit-text-stroke:1px var(--gold);margin-bottom:18px}
+.step h3{font:400 24px var(--f-display);margin:0 0 8px}
+.step p{color:var(--mist);margin:0}
+.step::before{content:"";position:absolute;inset:auto 0 0 0;height:2px;background:var(--c);transform:scaleX(0);transform-origin:right;transition:transform .8s var(--ease) .3s}
+.step.in::before{transform:scaleX(1)}
+
+.sec{padding:120px 0}
+.sec-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:34px}
+.sec-head h2{font:300 64px/1 var(--f-display);margin:8px 0 40px}
+
+.words{font:300 clamp(40px,6vw,84px)/1.2 var(--f-display);text-align:center;max-width:1000px;margin:0 auto}
+.words span{opacity:.12;transition:opacity .3s}
+.words span.lit{opacity:1}
+.words .t{color:var(--teal)}.words .e{color:var(--ember)}.words .g{color:var(--gold)}
+
+/* ============ כרטיסי חדרים ============ */
 .filters{display:flex;gap:8px;flex-wrap:wrap}
-.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-size:14px}
-.chip.on{background:var(--ink);color:var(--surface-strong)}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.room-card{overflow:hidden;transition:transform .2s}
-.room-card:hover{transform:translateY(-4px)}
-.room-card .img{aspect-ratio:16/10;background-size:cover;background-position:center;position:relative;
-  filter:grayscale(.35) brightness(.85);transition:filter .3s}
-.room-card:hover .img{filter:none}
-.room-card .img::after{content:"";position:absolute;inset:0;background-image:var(--grain);opacity:.5;mix-blend-mode:multiply}
-.room-card .body{padding:18px 20px 20px}
-.room-card h3{margin:8px 0 6px;font-size:21px}
-.room-card p{margin:0 0 14px;color:var(--ink-2);font-size:15px}
-.room-card .meta{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--ink-2)}
-.placeholder-img{background:
-  radial-gradient(60% 70% at 50% 40%, #9A4B47 0%, #3A1414 100%)}
+.chip{border:1px solid var(--hair);background:transparent;border-radius:999px;padding:6px 14px;font-size:13px;transition:.2s}
+.chip:hover{border-color:var(--gold)}
+.chip.on{background:var(--paper);color:var(--night);border-color:var(--paper)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;perspective:1200px}
+.room-card{background:var(--night-2);border:1px solid var(--hair);overflow:hidden;cursor:pointer;transform-style:preserve-3d;
+  transition:border-color .3s,transform .4s var(--ease),opacity .9s var(--ease),filter .9s var(--ease)}
+.room-card:hover{border-color:var(--c)}
+.room-card .img{aspect-ratio:16/10;background-size:cover;background-position:center;position:relative;overflow:hidden}
+.room-card .img::before{content:"";position:absolute;inset:0;background:inherit;background-size:cover;filter:grayscale(.6) brightness(.55);transition:transform .8s var(--ease),filter .5s}
+.room-card:hover .img::before{transform:scale(1.07);filter:none}
+.room-card .img::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,var(--night-2))}
+.room-card .body{padding:4px 20px 22px;position:relative}
+.room-card h3{font:400 24px/1.2 var(--f-display);margin:10px 0 6px}
+.room-card p{margin:0 0 16px;color:var(--mist);font-size:14px}
+.room-card .meta{display:flex;justify-content:space-between;font-size:12px;letter-spacing:.12em;color:var(--mist);border-top:1px solid var(--hair);padding-top:12px}
+.ph{background:radial-gradient(60% 70% at 50% 40%,#5e1a2c 0%,#0c0b0e 100%)}
 
 /* ============ פרטי חדר ============ */
-.details-hero{height:440px;background-size:cover;background-position:center;position:relative}
-.details-hero::after{content:"";position:absolute;inset:0;
-  background:linear-gradient(to bottom, transparent 30%, var(--bg) 100%), var(--grain);mix-blend-mode:normal}
-.details{max-width:900px;margin:-150px auto 0;position:relative;z-index:2;padding:0 24px 80px}
-.details h1{font-size:60px;margin:0 0 46px;white-space:nowrap}
-.details .row{display:flex;gap:12px;align-items:center;margin-bottom:22px;flex-wrap:wrap}
-.details .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:28px 0}
-.details .fact{padding:16px 18px}
-.details .fact b{display:block;font-size:24px}
-.details .fact span{font-size:13px;color:var(--ink-2)}
+.d-hero{position:relative;height:78vh;min-height:480px;overflow:hidden}
+.d-hero .bg{position:absolute;inset:-10% 0;background-size:cover;background-position:center;will-change:transform;filter:brightness(.6)}
+.d-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 20%,var(--night) 96%),radial-gradient(ellipse at center,transparent 40%,rgba(12,11,14,.7))}
+.d-hero .wrap{position:absolute;inset:auto 0 60px;z-index:2}
+.d-hero h1{font:300 clamp(56px,7vw,100px)/1 var(--f-display);margin:12px 0 60px;white-space:nowrap}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:10px 0 36px}
+.fact{background:var(--night-2);border:1px solid var(--hair);padding:26px}
+.fact b{display:block;font:300 48px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.fact span{font-size:12px;letter-spacing:.2em;color:var(--mist)}
 
-/* ============ מסך המשחק ============ */
-.play{display:grid;grid-template-columns:1fr 340px;gap:20px;max-width:1400px;margin:0 auto;padding:20px 24px 40px}
-.topbar{grid-column:1/-1;display:flex;align-items:center;gap:20px;padding:10px 18px}
-.topbar h1{font-size:22px;margin:0}
-.progress{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--ink-2)}
-.progress i{width:26px;height:6px;border-radius:3px;background:var(--line)}
-.progress i.done{background:var(--ink)}
-.timer{
-  margin-inline-start:auto;font-family:var(--mono);font-size:30px;font-weight:700;
-  padding:4px 16px;border-radius:10px;background:var(--ink);color:var(--surface-strong);
-  min-width:120px;text-align:center;direction:ltr;transition:background .3s;
-}
-.timer.warn{background:var(--medium)}
-.timer.danger{background:var(--hard);animation:beat 1s infinite}
-@keyframes beat{50%{transform:scale(1.06)}}
+/* ============ מסך המשחק (לפי המבנה ששלחתם) ============ */
+.app{display:grid;grid-template-rows:auto 1fr;gap:12px;max-width:1500px;margin-inline:auto;padding:12px 16px 16px}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:16px;padding-bottom:12px;border-bottom:1px solid var(--hair)}
+.case h1{font:300 30px/1 var(--f-display);margin:6px 0 0}
+.case .badge{margin-top:8px}
+.timer{text-align:center}
+.timer output{display:block;font:300 58px/1 var(--f-display);font-variant-numeric:tabular-nums;direction:ltr;transition:color .4s}
+.timer.warn output{color:var(--medium)}
+.timer.low output{color:var(--ember);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.5}}
+.prog{display:flex;gap:4px;justify-content:center;margin-top:8px;direction:ltr}
+.prog i{width:26px;height:2px;background:var(--hair);transition:background .6s}
+.prog i.on{background:var(--gold);box-shadow:0 0 8px var(--gold)}
+.right{display:flex;justify-content:flex-end;gap:10px;align-items:center}
 
-.stage{align-self:start;position:relative;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);background:#1b0f0e}
-.stage img{display:block;width:100%;height:auto}
-.stage::after{ /* וינייטה + גרעיניות */
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse at center, transparent 55%, rgba(30,8,8,.65) 100%), var(--grain);
-  mix-blend-mode:multiply;opacity:.9;
-}
-.hotspot{
-  position:absolute;transform:translate(-50%,-50%);
-  width:38px;height:38px;border-radius:50%;border:0;padding:0;z-index:3;
-  background:rgba(255,240,230,.18);backdrop-filter:blur(2px);
-  display:grid;place-items:center;
-}
-.hotspot::before,.hotspot::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid #F3D9B0}
-.hotspot::after{animation:ring 2.2s ease-out infinite}
-@keyframes ring{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.2);opacity:0}}
-.hotspot .dot{width:10px;height:10px;border-radius:50%;background:#F3D9B0;box-shadow:0 0 14px #F3D9B0}
-.hotspot .lbl{
-  position:absolute;bottom:calc(100% + 10px);white-space:nowrap;
-  background:rgba(40,12,12,.85);color:#F7ECE8;font-size:13px;font-weight:700;
-  padding:4px 10px;border-radius:6px;opacity:0;transform:translateY(4px);transition:.18s;pointer-events:none;
-}
-.hotspot:hover .lbl,.hotspot:focus-visible .lbl{opacity:1;transform:none}
-.hotspot.locked{background:rgba(0,0,0,.35)}
-.hotspot.locked::before{border-color:rgba(255,255,255,.35);border-style:dashed}
-.hotspot.locked::after{display:none}
-.hotspot.locked .dot{display:none}
-.hotspot.solved::before{border-color:var(--easy)}
-.hotspot.solved::after{display:none}
-.hotspot.solved .dot{background:var(--easy);box-shadow:0 0 12px var(--easy)}
-.hotspot.active::before{border-color:#fff;border-width:3px}
-.ico{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.hotspot.locked .ico{stroke:#fff;opacity:.8}
+.main{display:grid;grid-template-columns:220px minmax(0,1fr) 300px;gap:14px}
+.inv h2,.side h2{margin-top:6px}
+.slots{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.slot{aspect-ratio:1;border:1px dashed var(--hair);background:transparent;color:var(--mist);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:12px;padding:6px;text-align:center;line-height:1.3}
+.slot.full{border-style:solid;background:var(--night-3);color:var(--paper)}
+.slot.full:hover{border-color:var(--c,var(--gold))}
+.slot svg{width:32px;height:32px;stroke:var(--c,var(--gold));fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.slot.new{animation:arrive 1s ease-out}
+@keyframes arrive{0%{transform:scale(.6);opacity:0;box-shadow:0 0 0 0 rgba(201,168,106,.8)}60%{transform:scale(1.05);opacity:1}100%{transform:none;box-shadow:0 0 0 16px rgba(201,168,106,0)}}
+.inv .using{margin-top:12px;font-size:13px;color:var(--mist)}
 
-.toast{
-  position:absolute;top:16px;left:50%;transform:translate(-50%,-20px);z-index:5;
-  background:rgba(40,12,12,.9);color:#F7ECE8;padding:10px 18px;border-radius:999px;font-size:14px;
-  opacity:0;transition:.25s;pointer-events:none;display:flex;gap:8px;align-items:center;
-}
+.stage{position:relative;background:var(--night-2);border:1px solid var(--hair);overflow:hidden;align-self:start;aspect-ratio:1672/941}
+.stage img,.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.stage img{opacity:0;transition:opacity .6s}
+.stage.ready img{opacity:1}
+.stage.ready canvas{opacity:0;transition:opacity .6s}
+.stage::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:radial-gradient(ellipse at center,transparent 50%,rgba(12,11,14,.75) 100%)}
+.stage .lamp{position:absolute;inset:0;z-index:2;pointer-events:none;mix-blend-mode:soft-light;
+  background:radial-gradient(220px circle at var(--lx,50%) var(--ly,50%),rgba(255,230,190,.35),transparent 70%);opacity:0;transition:opacity .4s}
+.stage:hover .lamp{opacity:1}
+.stage .where{position:absolute;top:14px;right:16px;z-index:4}
+.stage .where b{display:block;font:300 22px var(--f-display);color:var(--paper);letter-spacing:0;margin-top:2px}
+.hot{position:absolute;transform:translate(-50%,-50%) scale(0);z-index:4;background:none;border:none;padding:0;width:44px;height:44px;display:grid;place-items:center;transition:transform .5s var(--ease)}
+.stage.ready .hot{transform:translate(-50%,-50%) scale(1);transition-delay:calc(var(--i)*120ms)}
+.hot::before{content:"";width:14px;height:14px;border-radius:50%;border:1px solid var(--gold);background:rgba(201,168,106,.25);animation:ring 2.4s ease-out infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(201,168,106,.6)}80%,100%{box-shadow:0 0 0 18px rgba(201,168,106,0)}}
+.hot.done::before{border-color:var(--easy);background:var(--easy);animation:none;opacity:.8;width:10px;height:10px}
+.hot.locked::before{border-style:dashed;border-color:var(--mist);background:none;animation:none;opacity:.7}
+.hot.locked svg{position:absolute;width:12px;height:12px;stroke:var(--mist);fill:none;stroke-width:2}
+.hot.active::before{border-color:var(--paper);border-width:2px}
+.hot span{position:absolute;top:40px;white-space:nowrap;font-size:12px;letter-spacing:.14em;color:var(--paper);background:rgba(12,11,14,.85);padding:3px 8px;opacity:0;transition:opacity .2s;pointer-events:none}
+.hot:hover span,.hot:focus-visible span{opacity:1}
+.toast{position:absolute;top:56px;left:50%;transform:translate(-50%,-10px);z-index:6;background:rgba(12,11,14,.92);border:1px solid var(--hair);
+  padding:8px 16px;font-size:13px;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
-/* פאנל צד */
-.side{display:flex;flex-direction:column;gap:20px}
-.panel{padding:20px 22px;position:relative}
-.panel h2{margin:4px 0 10px;font-size:22px}
-.panel .content{font-size:15px;color:var(--ink);background:rgba(255,255,255,.35);border-radius:var(--radius-sm);padding:12px 14px;border-inline-start:3px solid var(--c, var(--ink))}
-.panel .q{font-weight:700;margin:16px 0 10px}
-.panel .close{position:absolute;top:14px;left:14px;border:0;background:transparent;font-size:20px;color:var(--ink-2)}
-.empty{text-align:center;color:var(--ink-2);padding:34px 20px}
-.empty b{display:block;color:var(--ink);font-size:18px;margin-bottom:4px}
-
-/* מקלדת קוד */
-.slots{display:flex;gap:6px;justify-content:center;direction:ltr;margin:4px 0 12px}
-.slot{width:40px;height:50px;border-radius:8px;background:#2a1212;color:#F3D9B0;font:700 26px var(--mono);
-  display:grid;place-items:center;box-shadow:inset 0 2px 6px rgba(0,0,0,.6)}
-.slot.cur{outline:2px solid var(--medium)}
-.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;direction:ltr}
-.key{height:46px;border-radius:10px;border:1px solid var(--line);background:var(--surface-strong);
-  font:700 20px var(--mono);box-shadow:0 3px 0 rgba(90,31,31,.25);transition:transform .08s}
-.key:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(90,31,31,.25)}
-.key.ok{background:var(--ink);color:var(--surface-strong)}
+/* מגירה */
+.drawer{position:absolute;inset:auto 0 0 0;z-index:5;background:rgba(20,18,23,.96);border-top:1px solid var(--gold);padding:20px 22px 22px;backdrop-filter:blur(6px);
+  transform:translateY(0);transition:transform .45s var(--ease);max-height:92%;overflow:auto}
+.drawer[hidden]{display:block!important;transform:translateY(105%);visibility:hidden}
+.drawer .x{position:absolute;top:12px;left:14px;background:none;border:none;color:var(--mist);font-size:22px;width:36px;height:36px}
+.drawer .x:hover{color:var(--paper)}
+.drawer h3{font:300 28px var(--f-display);margin:4px 0 12px}
+.d-grid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:26px;align-items:start}
+.paper{background:#e9e1cf;color:#2a2228;font:18px/1.55 var(--f-display);padding:14px 18px;max-width:420px;transform:rotate(-1.2deg);box-shadow:0 10px 30px rgba(0,0,0,.5);animation:paperIn .6s var(--ease)}
+@keyframes paperIn{from{transform:rotate(-6deg) translateY(20px);opacity:0}}
+.paper small{display:block;font:12px var(--f-body);color:#6e6066;margin-bottom:4px}
+.q{margin:16px 0 0;color:var(--paper);font-weight:600}
+.pins{display:flex;gap:8px;direction:ltr;justify-content:center;margin-bottom:12px}
+.pins i{width:40px;height:54px;display:grid;place-items:center;font:300 32px var(--f-display);font-style:normal;border-bottom:1px solid var(--gold);transition:border-color .2s}
+.pins i.cur{border-bottom-color:var(--ember)}
+.pins i.pop{animation:pop .25s}
+@keyframes pop{50%{transform:translateY(-6px)}}
+.pins.ok i{color:var(--easy);border-bottom-color:var(--easy)}
+.keypad{display:grid;grid-template-columns:repeat(3,52px);gap:6px;direction:ltr;justify-content:center}
+.key{height:42px;border:1px solid var(--hair);background:var(--night-3);font:400 18px var(--f-mono);transition:.12s}
+.key:hover{border-color:var(--gold);color:var(--gold)}
+.key:active{transform:scale(.94)}
+.key.ok{background:var(--paper);color:var(--night);border-color:var(--paper)}
+.txt{display:flex;gap:8px}
+.txt input{background:transparent;border:none;border-bottom:1px solid var(--gold);color:var(--paper);font:300 24px var(--f-display);padding:6px 4px;width:220px}
+.txt input:focus{outline:none;border-bottom-color:var(--ember)}
+.fb{margin-top:10px;font-size:14px;min-height:1.4em;text-align:center}
+.fb.ok{color:var(--easy)}.fb.no{color:var(--ember)}
 .shake{animation:shake .4s}
 @keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
-.flash-ok .slot{background:var(--easy);color:#fff;transition:background .2s}
-.panel-actions{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
-.hint{margin-top:12px;font-size:14px;padding:10px 12px;border-radius:var(--radius-sm);
-  background:color-mix(in srgb, var(--info) 10%, transparent);color:var(--info);border:1px dashed color-mix(in srgb, var(--info) 45%, transparent)}
-.feedback{min-height:22px;font-size:14px;font-weight:700;margin-top:8px;text-align:center}
-.feedback.bad{color:var(--hard)} .feedback.good{color:var(--easy)}
 
-/* מחברת ממצאים */
-.notebook h3{margin:0 0 10px;font-size:17px;display:flex;align-items:center;gap:8px}
-.notebook ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:280px;overflow:auto}
-.notebook li{font-size:13.5px;padding:10px 12px;border-radius:var(--radius-sm);background:rgba(255,255,255,.4);
-  border-inline-start:3px solid var(--c);animation:in .35s}
-.notebook li b{display:block;font-size:13px}
-.notebook li code{font-family:var(--mono);background:var(--ink);color:var(--surface-strong);padding:0 6px;border-radius:4px}
-.notebook .none{font-size:13px;color:var(--ink-2)}
+/* צד */
+.side{display:flex;flex-direction:column;gap:14px;min-width:0}
+.hintbox{font-size:14px;border-right:2px solid var(--info);padding:4px 12px 4px 0;margin:10px 0;color:var(--paper);animation:in .4s}
+.muted{font-size:13px;color:var(--mist)}
+textarea{width:100%;min-height:90px;resize:vertical;background:transparent;border:1px solid var(--hair);color:var(--paper);font:15px var(--f-body);padding:10px}
+textarea:focus{outline:none;border-color:var(--gold)}
+.feed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;max-height:210px;overflow:auto;font-size:14px}
+.feed li{display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px;animation:in .4s}
+.feed time{font:12px var(--f-mono);color:var(--mist);direction:ltr;text-align:right;padding-top:2px}
+.feed li.sys span{color:var(--gold)}.feed li.bad span{color:var(--ember)}.feed li.good span{color:var(--easy)}
 @keyframes in{from{opacity:0;transform:translateY(-6px)}}
 
-/* מסך סיום */
-.overlay{position:fixed;inset:0;z-index:100;display:none;place-items:center;text-align:center;
-  background:rgba(239,220,214,.92);backdrop-filter:blur(4px)}
-.overlay.show{display:grid;animation:in .5s}
-.overlay h1{font-size:150px;margin:0 0 100px}
-.stats{display:flex;gap:16px;justify-content:center;margin-bottom:30px}
-.stats .card{padding:14px 26px}
-.stats b{display:block;font:700 28px var(--mono)}
+/* שכבות */
+.veil{position:fixed;inset:0;z-index:70;background:rgba(12,11,14,.88);backdrop-filter:blur(8px);display:grid;place-items:center;text-align:center;padding:24px}
+.veil[hidden]{display:none}
+.veil h2{font:300 clamp(60px,10vw,130px)/1 var(--f-display);margin:12px 0 70px}
+.veil p{color:var(--mist);margin:0 auto 20px;max-width:44ch}
+.stats{display:flex;gap:40px;justify-content:center;margin:0 0 28px}
+.stats div{display:flex;flex-direction:column}
+.stats b{font:300 38px var(--f-display);font-variant-numeric:tabular-nums}
+.stats span{font-size:12px;letter-spacing:.2em;color:var(--mist)}
+.veil .row{display:flex;gap:10px;justify-content:center}
 
 /* ============ ניהול ============ */
-.admin{display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start}
-table{width:100%;border-collapse:collapse;font-size:15px}
-th,td{text-align:start;padding:12px 14px;border-bottom:1px solid var(--line)}
-th{font-size:12px;letter-spacing:.1em;color:var(--ink-2)}
-tr:hover td{background:rgba(255,255,255,.3)}
-.thumb{width:56px;height:36px;border-radius:6px;background-size:cover;background-position:center}
-.act{display:flex;gap:6px}
+.admin{display:grid;grid-template-columns:1fr 380px;gap:22px;align-items:start;padding-bottom:80px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:start;padding:12px 14px;border-bottom:1px solid var(--hair)}
+th{font-size:11px;letter-spacing:.2em;color:var(--mist);font-weight:700}
+tbody tr{transition:background .2s}
+tbody tr:hover{background:var(--night-3)}
+.thumb{width:60px;height:38px;background-size:cover;background-position:center;filter:brightness(.8)}
 .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
-.field label{font-size:13px;font-weight:700}
-.field input,.field select,.field textarea{
-  font:inherit;color:var(--ink);background:rgba(255,255,255,.55);border:1px solid var(--line);
-  border-radius:var(--radius-sm);padding:9px 12px}
-.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--ink);outline-offset:1px}
+.field label{font-size:11px;letter-spacing:.2em;color:var(--mist);font-weight:700}
+.field input,.field textarea{font:inherit;color:var(--paper);background:transparent;border:1px solid var(--hair);padding:9px 12px;min-height:0}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--gold)}
 .seg{display:flex;gap:6px}
-.seg button{flex:1;border:1px solid var(--line);background:transparent;border-radius:var(--radius-sm);padding:8px}
-.seg button.on{background:color-mix(in srgb, var(--c) 15%, transparent);border-color:var(--c);color:var(--c);font-weight:700}
+.seg button{flex:1;border:1px solid var(--hair);background:transparent;padding:8px;font-size:13px}
+.seg button.on{border-color:var(--c);color:var(--c);background:color-mix(in srgb,var(--c) 10%,transparent)}
 
-/* ============ פלטה ============ */
-.swatches{display:flex;gap:14px;flex-wrap:wrap;margin-top:40px;justify-content:center}
-.sw{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:var(--ink-2)}
-.sw i{width:54px;height:54px;border-radius:12px;background:var(--c);box-shadow:var(--shadow);border:1px solid var(--line)}
+.swatches{display:flex;gap:18px;justify-content:center;margin-top:46px}
+.sw{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;letter-spacing:.15em;color:var(--mist)}
+.sw i{width:42px;height:42px;border-radius:50%;background:var(--c);box-shadow:0 0 22px color-mix(in srgb,var(--c) 50%,transparent);border:1px solid var(--hair)}
 
-.note{font-size:13px;color:var(--ink-2);border:1px dashed var(--line);border-radius:var(--radius-sm);padding:10px 14px;margin-top:18px}
-
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none;filter:none}.grain-in{-webkit-mask:none;mask:none}}
 </style>
 </head>
 <body>
-
-<!-- פילטר טשטוש אנכי לאפקט ההתפוגגות -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <filter id="vblur" x="-10%" y="-10%" width="120%" height="160%"><feGaussianBlur stdDeviation="0 10"/></filter>
-  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
-  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
-  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/></symbol>
+  <filter id="vblur" x="-10%" y="-10%" width="120%" height="170%"><feGaussianBlur stdDeviation="0 10"/></filter>
 </svg>
+<div class="film" aria-hidden="true"></div>
+<div class="scrollbar" id="sbar"></div>
 
 <nav class="demo-nav" aria-label="מסכי התצוגה">
   <span class="tag">תצוגה מקדימה</span>
-  <button data-go="home"    aria-pressed="true">דף הבית</button>
+  <button data-go="home" aria-pressed="true">דף הבית</button>
   <button data-go="rooms">רשימת חדרים</button>
   <button data-go="details">פרטי חדר</button>
   <button data-go="play">מסך המשחק</button>
@@ -312,165 +303,189 @@ tr:hover td{background:rgba(255,255,255,.3)}
 
 <!-- ================= HOME ================= -->
 <section class="screen active" id="home" data-route="/">
-  <div class="hero">
-    <div>
-      <div class="eyebrow">חדרי בריחה אונליין</div>
-      <h1 class="dissolve" data-text="צאו מכאן">צאו מכאן</h1>
-      <p>חדרים נעולים, רמזים חבויים ושעון שלא מחכה. מצאו את הקוד לפני שהזמן אוזל.</p>
-      <button class="btn" data-go="rooms">בחרו חדר ←</button>
-      <div class="swatches">
-        <div class="sw"><i style="--c:var(--bg)"></i>רקע</div>
-        <div class="sw"><i style="--c:var(--ink)"></i>דיו</div>
+  <div class="hero" id="hero">
+    <div class="blob a" data-par=".25"></div><div class="blob b" data-par="-.2"></div><div class="blob c" data-par=".4"></div>
+    <div class="torch"></div>
+    <div class="hero-in" data-par="-.15">
+      <div class="label reveal">חדרי בריחה אונליין</div>
+      <h1 class="dissolve grain-in" data-text="צאו מכאן">צאו מכאן</h1>
+      <p class="reveal" style="--i:2">חדרים נעולים, רמזים חבויים ושעון שלא מחכה. מצאו את הקוד לפני שהזמן אוזל.</p>
+      <div class="reveal" style="--i:3"><button class="btn" data-go="rooms">בחרו חדר ←</button></div>
+      <div class="swatches reveal" style="--i:4">
         <div class="sw"><i style="--c:var(--easy)"></i>קל</div>
         <div class="sw"><i style="--c:var(--medium)"></i>בינוני</div>
         <div class="sw"><i style="--c:var(--hard)"></i>קשה</div>
-        <div class="sw"><i style="--c:var(--info)"></i>מידע / רמז</div>
+        <div class="sw"><i style="--c:var(--info)"></i>רמז / מידע</div>
       </div>
     </div>
+    <div class="scroll-cue"><span class="label">גללו</span><i></i></div>
+  </div>
+
+  <div class="wrap sec">
+    <div class="label reveal">איך זה עובד</div>
+    <div class="steps">
+      <div class="step reveal" style="--i:0;--c:var(--teal)"><b>01</b><h3>בחרו חדר</h3><p>כל חדר עם סיפור, רמת קושי ותמונה משלו.</p></div>
+      <div class="step reveal" style="--i:1;--c:var(--gold)"><b>02</b><h3>חקרו ופענחו</h3><p>לחצו על נקודות בחדר, אספו ממצאים ופתרו חידות.</p></div>
+      <div class="step reveal" style="--i:2;--c:var(--ember)"><b>03</b><h3>צאו בזמן</h3><p>10 דקות על השעון. הקוד האחרון פותח את הדלת.</p></div>
+    </div>
+  </div>
+
+  <div class="wrap sec" id="wordsSec">
+    <p class="words" id="words">עשר <span class="t">דקות</span>. חמש נקודות. שלוש <span class="g">חידות</span>. ודלת <span class="e">אחת</span> שצריך לפתוח.</p>
+  </div>
+
+  <div class="wrap sec" style="padding-top:0">
+    <div class="sec-head">
+      <h2 class="dissolve grain-in" data-text="החדרים">החדרים</h2>
+      <button class="btn line reveal" data-go="rooms">לכל החדרים ←</button>
+    </div>
+    <div class="grid" data-cards></div>
   </div>
 </section>
 
 <!-- ================= ROOMS ================= -->
 <section class="screen" id="rooms" data-route="/rooms">
-  <div class="wrap">
-    <div class="section-head">
-      <h2 class="dissolve" data-text="החדרים">החדרים</h2>
-      <div class="filters">
-        <button class="chip on">הכל</button>
-        <button class="chip">קל</button>
-        <button class="chip">בינוני</button>
-        <button class="chip">קשה</button>
+  <div class="wrap" style="padding-top:70px;padding-bottom:100px">
+    <div class="sec-head">
+      <div><div class="label reveal">קטלוג</div><h2 class="dissolve grain-in" data-text="כל החדרים">כל החדרים</h2></div>
+      <div class="filters reveal" style="--i:1">
+        <button class="chip on" data-f="all">הכל</button>
+        <button class="chip" data-f="easy">קל</button>
+        <button class="chip" data-f="medium">בינוני</button>
+        <button class="chip" data-f="hard">קשה</button>
       </div>
     </div>
-    <div class="grid">
-      <article class="card room-card" data-go="details">
-        <div class="img" style="background-image:url('../public/images/Detective%20Office%20Escape%20Room_%20Clues%20and%20Safe.png')"></div>
-        <div class="body">
-          <span class="badge medium">בינוני</span>
-          <h3>The Mysterious Mansion</h3>
-          <p>You are trapped in a mysterious mansion and must solve puzzles to escape.</p>
-          <div class="meta"><span>Mystery</span><span>5 נקודות · 10 דק'</span></div>
-        </div>
-      </article>
-      <article class="card room-card">
-        <div class="img" style="background-image:url('../public/images/laboratory.jpg')"></div>
-        <div class="body">
-          <span class="badge easy">קל</span>
-          <h3>חדר לדוגמה – מעבדה</h3>
-          <p>כרטיס דמה להמחשת צבע רמת "קל".</p>
-          <div class="meta"><span>מדע</span><span>10 דק'</span></div>
-        </div>
-      </article>
-      <article class="card room-card">
-        <div class="img placeholder-img"></div>
-        <div class="body">
-          <span class="badge hard">קשה</span>
-          <h3>חדר לדוגמה – ללא תמונה</h3>
-          <p>כך נראה כרטיס כשאין תמונה לחדר.</p>
-          <div class="meta"><span>הרפתקה</span><span>10 דק'</span></div>
-        </div>
-      </article>
-    </div>
+    <div class="grid" data-cards></div>
   </div>
 </section>
 
 <!-- ================= DETAILS ================= -->
 <section class="screen" id="details" data-route="/rooms/room-1">
-  <div class="details-hero" style="background-image:url('../public/images/Detective%20Office%20Escape%20Room_%20Clues%20and%20Safe.png')"></div>
-  <div class="details">
-    <div class="eyebrow">Mystery</div>
-    <h1 class="dissolve" data-text="The Mysterious Mansion">The Mysterious Mansion</h1>
-    <div class="row"><span class="badge medium">בינוני</span><span style="color:var(--ink-2);font-size:14px">נוסף ב-01.01.2023</span></div>
-    <p style="font-size:18px;max-width:640px">You are trapped in a mysterious mansion and must solve puzzles to escape.</p>
-    <div class="facts">
-      <div class="card fact"><b>10:00</b><span>זמן לרשותכם</span></div>
-      <div class="card fact"><b>5</b><span>נקודות לחקירה</span></div>
-      <div class="card fact"><b>3</b><span>חידות לפתרון</span></div>
+  <div class="d-hero">
+    <div class="bg" id="dBg" style="background-image:url('../public/images/Detective%20Office%20Escape%20Room_%20Clues%20and%20Safe.png')"></div>
+    <div class="wrap">
+      <div class="label reveal">Mystery</div>
+      <h1 class="dissolve grain-in" data-text="The Mysterious Mansion">The Mysterious Mansion</h1>
+      <div class="reveal" style="--i:2"><span class="badge medium">בינוני</span></div>
     </div>
-    <button class="btn" data-go="play">התחל משחק ←</button>
-    <button class="btn ghost" data-go="rooms" style="margin-inline-start:10px">חזרה לחדרים</button>
+  </div>
+  <div class="wrap" style="padding-bottom:110px">
+    <p class="reveal" style="font-size:20px;max-width:640px;color:var(--mist)">You are trapped in a mysterious mansion and must solve puzzles to escape.</p>
+    <div class="facts">
+      <div class="fact reveal" style="--i:0"><b data-count="10" data-suffix=":00">0</b><span>דקות על השעון</span></div>
+      <div class="fact reveal" style="--i:1"><b data-count="5">0</b><span>נקודות לחקירה</span></div>
+      <div class="fact reveal" style="--i:2"><b data-count="3">0</b><span>חידות לפתרון</span></div>
+    </div>
+    <div class="reveal" style="--i:3"><button class="btn" data-go="play">התחל משחק ←</button> <button class="btn line" data-go="rooms">חזרה לחדרים</button></div>
   </div>
 </section>
 
 <!-- ================= PLAY ================= -->
 <section class="screen" id="play" data-route="/play/room-1">
-  <div class="play">
-    <header class="card topbar">
-      <h1>The Mysterious Mansion</h1>
-      <span class="badge medium">בינוני</span>
-      <div class="progress" id="progress"></div>
-      <button class="btn ghost small" id="skip" title="כפתור דמו בלבד">דמו: קפוץ ל-0:45</button>
-      <div class="timer" id="timer">10:00</div>
+  <div class="app">
+    <header class="bar">
+      <div class="case">
+        <div class="label">Mystery · חדר 01</div>
+        <h1>The Mysterious Mansion</h1>
+        <span class="badge medium">בינוני</span>
+      </div>
+      <div class="timer" id="timerBox">
+        <div class="label">זמן שנותר</div>
+        <output id="timer">10:00</output>
+        <div class="prog" id="prog" aria-label="חידות שנפתרו"></div>
+      </div>
+      <div class="right">
+        <button class="btn line sm" id="skip" title="כפתור דמו בלבד">דמו: קפוץ ל-0:45</button>
+      </div>
     </header>
 
-    <div class="stage" id="stage">
-      <img src="../public/images/Detective%20Office%20Escape%20Room_%20Clues%20and%20Safe.png" alt="משרד החוקר">
-      <div class="toast" id="toast"><svg class="ico"><use href="#i-lock"/></svg><span></span></div>
-    </div>
+    <div class="main">
+      <aside class="panel inv">
+        <div class="label">מה מצאתם</div>
+        <h2>הממצאים שלכם</h2>
+        <div class="slots" id="slots"></div>
+        <div class="using">לחצו על ממצא כדי לקרוא אותו שוב.</div>
+      </aside>
 
-    <aside class="side">
-      <section class="card panel" id="panel" aria-live="polite"></section>
-      <section class="card panel notebook">
-        <h3><svg class="ico"><use href="#i-book"/></svg> מחברת ממצאים</h3>
-        <ol id="notes"></ol>
-      </section>
-    </aside>
+      <div class="stage" id="stage">
+        <canvas id="scene" aria-hidden="true"></canvas>
+        <img id="roomImg" src="../public/images/Detective%20Office%20Escape%20Room_%20Clues%20and%20Safe.png" alt="משרד החוקר">
+        <div class="lamp"></div>
+        <div class="where label">החדר<b>משרד החוקר</b></div>
+        <div id="hots"></div>
+        <div class="toast" id="toast"></div>
+        <div class="drawer" id="drawer" hidden role="dialog" aria-labelledby="dTitle">
+          <button class="x" id="dClose" type="button" aria-label="סגירה">×</button>
+          <div class="label" id="dKicker"></div>
+          <h3 id="dTitle"></h3>
+          <div id="dBody"></div>
+        </div>
+      </div>
+
+      <aside class="side">
+        <div class="panel">
+          <div class="label">רמזים</div>
+          <h2>תקועים?</h2>
+          <div id="hintArea"></div>
+        </div>
+        <div class="panel">
+          <div class="label">טיוטה</div>
+          <h2>ההערות שלי</h2>
+          <textarea aria-label="הערות" placeholder="חישובים, ניחושים, מספרים שראיתם…"></textarea>
+        </div>
+        <div class="panel">
+          <div class="label">מה קרה בחדר</div>
+          <h2>יומן</h2>
+          <ul class="feed" id="feed"></ul>
+        </div>
+      </aside>
+    </div>
   </div>
 
-  <div class="overlay" id="win">
+  <div class="veil" id="winVeil" hidden>
     <div>
-      <div class="eyebrow">החדר הושלם</div>
-      <h1 class="dissolve" data-text="יצאתם!">יצאתם!</h1>
+      <div class="label">החדר הושלם</div>
+      <h2 class="dissolve grain-in" data-text="יצאתם!">יצאתם!</h2>
       <div class="stats">
-        <div class="card"><b id="s-time">0:00</b>זמן שנותר</div>
-        <div class="card"><b id="s-hints">0</b>רמזים</div>
-        <div class="card"><b id="s-tries">0</b>ניסיונות שגויים</div>
+        <div><b id="wTime">—</b><span>זמן שנותר</span></div>
+        <div><b id="wHints">—</b><span>רמזים</span></div>
+        <div><b id="wWrong">—</b><span>ניסיונות שגויים</span></div>
       </div>
-      <button class="btn" onclick="location.reload()">שחקו שוב</button>
-      <button class="btn ghost" data-go="rooms" style="margin-inline-start:10px">לחדרים נוספים</button>
+      <div class="row"><button class="btn" onclick="location.reload()">לשחק שוב</button><button class="btn line" data-go="rooms">לחדרים נוספים</button></div>
     </div>
   </div>
 </section>
 
 <!-- ================= ADMIN ================= -->
 <section class="screen" id="admin" data-route="/admin/rooms">
-  <div class="wrap">
-    <div class="section-head">
-      <h2 class="dissolve" data-text="ניהול חדרים">ניהול חדרים</h2>
-      <button class="btn">+ חדר חדש</button>
+  <div class="wrap" style="padding-top:70px">
+    <div class="sec-head">
+      <div><div class="label reveal">ניהול</div><h2 class="dissolve grain-in" data-text="החדרים במערכת">החדרים במערכת</h2></div>
+      <button class="btn reveal">+ חדר חדש</button>
     </div>
     <div class="admin">
-      <div class="card" style="padding:6px 6px">
+      <div class="panel reveal" style="padding:4px">
         <table>
           <thead><tr><th></th><th>שם</th><th>קטגוריה</th><th>רמה</th><th>נוצר</th><th></th></tr></thead>
           <tbody>
-            <tr>
-              <td><div class="thumb" style="background-image:url('../public/images/Detective%20Office%20Escape%20Room_%20Clues%20and%20Safe.png')"></div></td>
-              <td><b>The Mysterious Mansion</b></td><td>Mystery</td>
-              <td><span class="badge medium">בינוני</span></td><td>01.01.2023</td>
-              <td class="act"><button class="btn ghost small">עריכה</button><button class="btn ghost small" style="color:var(--hard);border-color:var(--hard)">מחיקה</button></td>
-            </tr>
-            <tr>
-              <td><div class="thumb" style="background-image:url('../public/images/laboratory.jpg')"></div></td>
-              <td><b>חדר לדוגמה – מעבדה</b></td><td>מדע</td>
-              <td><span class="badge easy">קל</span></td><td>—</td>
-              <td class="act"><button class="btn ghost small">עריכה</button><button class="btn ghost small" style="color:var(--hard);border-color:var(--hard)">מחיקה</button></td>
-            </tr>
+            <tr><td><div class="thumb" style="background-image:url('../public/images/Detective%20Office%20Escape%20Room_%20Clues%20and%20Safe.png')"></div></td>
+              <td><b>The Mysterious Mansion</b></td><td>Mystery</td><td><span class="badge medium">בינוני</span></td><td>01.01.2023</td>
+              <td><button class="btn line sm">עריכה</button> <button class="btn line sm" style="color:var(--ember)">מחיקה</button></td></tr>
+            <tr><td><div class="thumb" style="background-image:url('../public/images/laboratory.jpg')"></div></td>
+              <td><b>חדר לדוגמה – מעבדה</b></td><td>מדע</td><td><span class="badge easy">קל</span></td><td>—</td>
+              <td><button class="btn line sm">עריכה</button> <button class="btn line sm" style="color:var(--ember)">מחיקה</button></td></tr>
           </tbody>
         </table>
       </div>
-      <form class="card panel" onsubmit="return false">
-        <h2>הוספת / עריכת חדר</h2>
+      <form class="panel reveal" style="--i:1;padding:22px" onsubmit="return false">
+        <div class="label">טופס</div>
+        <h2>הוספה / עריכה</h2>
         <div class="field"><label>שם החדר</label><input value="The Mysterious Mansion"></div>
         <div class="field"><label>תיאור</label><textarea rows="3">You are trapped in a mysterious mansion and must solve puzzles to escape.</textarea></div>
         <div class="field"><label>קטגוריה</label><input value="Mystery"></div>
         <div class="field"><label>כתובת תמונה</label><input value="/images/mansion.jpg" dir="ltr"></div>
         <div class="field"><label>רמת קושי</label>
-          <div class="seg">
-            <button type="button" class="easy">קל</button>
-            <button type="button" class="medium on">בינוני</button>
-            <button type="button" class="hard">קשה</button>
-          </div>
+          <div class="seg"><button type="button" class="easy">קל</button><button type="button" class="medium on">בינוני</button><button type="button" class="hard">קשה</button></div>
         </div>
         <button class="btn" style="width:100%;justify-content:center">שמירה</button>
       </form>
@@ -479,25 +494,86 @@ tr:hover td{background:rgba(255,255,255,.3)}
 </section>
 
 <script>
-/* ---------- ניווט דמו ---------- */
-const routeEl = document.getElementById('route');
-function go(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active', s.id===id));
-  document.querySelectorAll('.demo-nav [data-go]').forEach(b=>b.setAttribute('aria-pressed', b.dataset.go===id));
-  routeEl.textContent = document.getElementById(id).dataset.route;
-  document.getElementById('win').classList.remove('show');
-  window.scrollTo(0,0);
-  if(id==='play') startTimer();
-}
-document.addEventListener('click', e=>{
-  const t = e.target.closest('[data-go]'); if(t) go(t.dataset.go);
-});
-document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{
-  b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
-});
+(function(){
+const $ = s => document.querySelector(s);
+const OFFICE = "../public/images/Detective%20Office%20Escape%20Room_%20Clues%20and%20Safe.png";
 
-/* ---------- נתונים: העתק של src/data/hotspot.ts ---------- */
-const hotspots = [
+/* ---------- כרטיסי חדרים ---------- */
+const ROOMS = [
+  {title:"The Mysterious Mansion",desc:"You are trapped in a mysterious mansion and must solve puzzles to escape.",cat:"Mystery",img:OFFICE,d:"medium",go:"details"},
+  {title:"חדר לדוגמה – מעבדה",desc:"כרטיס דמה להמחשת צבע רמת \"קל\".",cat:"מדע",img:"../public/images/laboratory.jpg",d:"easy"},
+  {title:"חדר לדוגמה – ללא תמונה",desc:"כך נראה כרטיס כשאין לחדר תמונה.",cat:"הרפתקה",img:"",d:"hard"},
+];
+const DL = {easy:"קל",medium:"בינוני",hard:"קשה"};
+document.querySelectorAll('[data-cards]').forEach(g=>{
+  g.innerHTML = ROOMS.map((r,i)=>`<article class="room-card reveal ${r.d}" data-d="${r.d}" style="--i:${i}" ${r.go?`data-go="${r.go}"`:''}>
+    <div class="img ${r.img?'':'ph'}" ${r.img?`style="background-image:url('${r.img}')"`:''}></div>
+    <div class="body"><span class="badge ${r.d}">${DL[r.d]}</span><h3>${r.title}</h3><p>${r.desc}</p>
+    <div class="meta"><span>${r.cat}</span><span>10 דק'</span></div></div></article>`).join('');
+});
+/* הטיה תלת-ממדית עדינה */
+document.addEventListener('mousemove',e=>{
+  const c = e.target.closest('.room-card'); document.querySelectorAll('.room-card').forEach(x=>{ if(x!==c) x.style.transform=''; });
+  if(!c || !c.classList.contains('in')) return;
+  const r = c.getBoundingClientRect(), x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5;
+  c.style.transform = `rotateY(${x*8}deg) rotateX(${-y*8}deg) translateY(-4px)`;
+});
+/* סינון */
+document.querySelectorAll('.chip').forEach(ch=>ch.onclick=()=>{
+  document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===ch));
+  document.querySelectorAll('#rooms .room-card').forEach(c=>{
+    const show = ch.dataset.f==='all'||c.dataset.d===ch.dataset.f;
+    c.style.display = show?'':'none';
+  });
+});
+document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on')});
+
+/* ---------- הופעה בגלילה ---------- */
+const io = new IntersectionObserver(es=>es.forEach(e=>{
+  if(!e.isIntersecting) return;
+  e.target.classList.add('in'); io.unobserve(e.target);
+  if(e.target.dataset.count!==undefined) countUp(e.target);
+}),{threshold:.2});
+function observe(scope){ scope.querySelectorAll('.reveal,.grain-in,[data-count]').forEach(el=>{el.classList.remove('in');io.observe(el)}); }
+function countUp(el){
+  const to=+el.dataset.count, suf=el.dataset.suffix||'', t0=performance.now();
+  const step=t=>{const p=Math.min(1,(t-t0)/1200),v=Math.round(to*(1-Math.pow(1-p,3)));el.textContent=v+suf;if(p<1)requestAnimationFrame(step)};
+  requestAnimationFrame(step);
+}
+
+/* ---------- גלילה: פרלקסה, פס התקדמות, מילים נדלקות ---------- */
+const words = $('#words'); words.innerHTML = words.innerHTML.replace(/(<span[^>]*>.*?<\/span>)|([^\s<]+)/g,(m,tag)=>tag?tag:`<span>${m}</span>`);
+function onScroll(){
+  const y=scrollY, h=document.documentElement.scrollHeight-innerHeight;
+  $('#sbar').style.transform=`scaleX(${h>0?y/h:0})`;
+  document.querySelectorAll('.screen.active [data-par]').forEach(el=>el.style.translate=`0 ${y*+el.dataset.par}px`);
+  const bg=$('#dBg'); if(bg) bg.style.transform=`translateY(${y*.35}px) scale(${1+y/4000})`;
+  if($('#home').classList.contains('active')){
+    const r=$('#wordsSec').getBoundingClientRect(), p=Math.min(1,Math.max(0,(innerHeight*.85-r.top)/(innerHeight*.6)));
+    const ws=words.querySelectorAll('span'); ws.forEach((s,i)=>s.classList.toggle('lit',i<p*ws.length));
+  }
+}
+addEventListener('scroll',onScroll,{passive:true});
+$('#hero').addEventListener('mousemove',e=>{const r=e.currentTarget.getBoundingClientRect();
+  e.currentTarget.style.setProperty('--mx',(e.clientX-r.left)+'px');e.currentTarget.style.setProperty('--my',(e.clientY-r.top)+'px')});
+
+/* ---------- ניווט ---------- */
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
+  document.querySelectorAll('.demo-nav [data-go]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.go===id));
+  $('#route').textContent=$('#'+id).dataset.route;
+  $('#winVeil').hidden=true;
+  scrollTo({top:0,behavior:'instant'});
+  observe($('#'+id)); onScroll();
+  if(id==='play') enterRoom();
+}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t)go(t.dataset.go)});
+observe($('#home'));
+
+/* =========================================================
+   מסך המשחק – נתונים: העתק של src/data/hotspot.ts
+   ========================================================= */
+const HOTS = [
  {id:"hotspot-1",label:"הפגישה הסודית",xPercent:50,yPercent:50,type:"puzzle",
   content:"במעטפה שעל השולחן נמצא דף מיומנו של החוקר: 'יצאתי בשעה 16:10. ההליכה לתחנה ארכה 20 דקות. כשהגעתי, הרכבת הייתה אמורה לצאת בעוד 15 דקות. הפגישה נקבעה לעשר דקות לפני יציאת הרכבת.'",
   question:"קוד הארון הוא שעת הפגישה בארבע ספרות, ללא נקודתיים. מהו הקוד?",answerType:"text",answer:"1635",
@@ -513,154 +589,158 @@ const hotspots = [
   content:"הכספת נעולה. על הדלת מותקן לוח מקשים עם מקום לשש ספרות.",question:"מהו הקוד לפתיחת הכספת?",answerType:"text",answer:"241635",
   hint:"חבר את מספר הבית בשתי ספרות לשעת הפגישה בארבע ספרות.",isFinal:true,requiresHotspotId:"hotspot-3"}
 ];
-const byId = Object.fromEntries(hotspots.map(h=>[h.id,h]));
+const byId = Object.fromEntries(HOTS.map(h=>[h.id,h]));
+const PUZZLES = HOTS.filter(h=>h.type==='puzzle');
+const ICON = {
+  info:'<svg viewBox="0 0 36 36"><path d="M9 5h13l6 6v20H9z"/><path d="M22 5v6h6M13 17h11M13 22h8"/></svg>',
+  puzzle:'<svg viewBox="0 0 36 36"><circle cx="11" cy="18" r="5"/><path d="M16 18h15M26 18v5M30 18v4"/></svg>',
+  lock:'<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>'
+};
 
-/* ---------- מצב (כמו ב-PlayPage) ---------- */
-let solved = [], opened = [], selected = null, input = "", hintShown = false;
-let hints = 0, wrong = 0, done = false;
+const S = {left:600,start:600,solved:[],found:[],sel:null,input:"",hintFor:[],wrong:0,won:false,tick:null,entered:false};
+const isLocked = h => h.requiresHotspotId && !S.solved.includes(h.requiresHotspotId);
+const isDone   = h => h.type==='info' ? S.found.includes(h.id) : S.solved.includes(h.id);
+const keypad   = h => h.type==='puzzle' && (h.answerType==='number' || /^\d+$/.test(h.answer));
+const fmt = s => String(Math.floor(Math.max(0,s)/60)).padStart(2,'0')+':'+String(Math.max(0,s)%60).padStart(2,'0');
+const stamp = () => fmt(S.start-S.left);
 
-const stage = document.getElementById('stage');
-const panel = document.getElementById('panel');
-const notes = document.getElementById('notes');
-const isLocked = h => h.requiresHotspotId && !solved.includes(h.requiresHotspotId);
-const isDone   = h => h.type==='info' ? opened.includes(h.id) : solved.includes(h.id);
-const useKeypad = h => h.type==='puzzle' && (h.answerType==='number' || /^\d+$/.test(h.answer));
-
-function renderHotspots(){
-  stage.querySelectorAll('.hotspot').forEach(n=>n.remove());
-  hotspots.forEach(h=>{
-    const b = document.createElement('button');
-    b.className = 'hotspot' + (isLocked(h)?' locked':'') + (isDone(h)?' solved':'') + (selected?.id===h.id?' active':'');
-    b.style.left = h.xPercent+'%'; b.style.top = h.yPercent+'%';
-    b.setAttribute('aria-label', h.label);
-    b.innerHTML = isLocked(h) ? '<svg class="ico"><use href="#i-lock"/></svg>' : '<span class="dot"></span>';
-    b.innerHTML += `<span class="lbl">${h.label}</span>`;
-    b.onclick = ()=>clickHotspot(h);
-    stage.appendChild(b);
-  });
-  const puzzles = hotspots.filter(h=>h.type==='puzzle');
-  document.getElementById('progress').innerHTML =
-    puzzles.map(p=>`<i class="${solved.includes(p.id)?'done':''}"></i>`).join('') +
-    `<span style="margin-inline-start:6px">${solved.length}/${puzzles.length} חידות</span>`;
+/* ---------- כניסה לחדר: התמונה "מתגבשת" מגרגירים ---------- */
+function enterRoom(){
+  renderAll();
+  if(S.entered) return; S.entered=true;
+  const stage=$('#stage'), img=$('#roomImg'), cv=$('#scene');
+  const run=()=>{
+    const r=stage.getBoundingClientRect(), W=Math.round(r.width), H=Math.round(r.height);
+    cv.width=W; cv.height=H; const ctx=cv.getContext('2d');
+    const mw=W, mh=H;
+    const m=document.createElement('canvas'); m.width=mw; m.height=mh; const mc=m.getContext('2d');
+    const md=mc.createImageData(mw,mh), rnd=new Float32Array(mw*mh);
+    for(let i=0;i<rnd.length;i++) rnd[i]=Math.random()*.7 + (Math.floor(i/mw)/mh)*.3;  // מלמעלה למטה, עם פיזור
+    const t0=performance.now(), dur=1700;
+    const frame=t=>{
+      const p=Math.min(1,(t-t0)/dur), th=p*1.05;
+      for(let i=0;i<rnd.length;i++) md.data[i*4+3] = rnd[i]<th ? 255 : 0;
+      mc.putImageData(md,0,0);
+      ctx.globalCompositeOperation='source-over'; ctx.clearRect(0,0,W,H); ctx.drawImage(img,0,0,W,H);
+      ctx.globalCompositeOperation='destination-in'; ctx.imageSmoothingEnabled=false; ctx.drawImage(m,0,0,W,H);
+      if(p<1) requestAnimationFrame(frame);
+      else { stage.classList.add('ready'); startTimer(); log('הדלת ננעלה. בהצלחה','sys'); }
+    };
+    requestAnimationFrame(frame);
+  };
+  img.complete ? run() : img.addEventListener('load',run,{once:true});
 }
+$('#stage').addEventListener('mousemove',e=>{const r=e.currentTarget.getBoundingClientRect();
+  e.currentTarget.style.setProperty('--lx',(e.clientX-r.left)+'px');e.currentTarget.style.setProperty('--ly',(e.clientY-r.top)+'px')});
 
-function toast(msg){
-  const t = document.getElementById('toast'); t.querySelector('span').textContent = msg;
-  t.classList.add('show'); clearTimeout(t._x); t._x = setTimeout(()=>t.classList.remove('show'), 2200);
-}
-
-function clickHotspot(h){
-  if(done) return;
-  if(isLocked(h)){ toast('צריך לפתור קודם: ' + byId[h.requiresHotspotId].label); return; }
-  selected = h; input = ""; hintShown = false;
-  if(h.type==='info' && !opened.includes(h.id)){ opened.push(h.id); addNote(h); }
-  renderHotspots(); renderPanel();
-}
-
-function renderPanel(){
-  const h = selected;
-  if(!h){
-    panel.innerHTML = `<div class="empty"><b>חקרו את החדר</b>לחצו על נקודה מאירה בתמונה.<br>נקודה עם מנעול תיפתח אחרי פתרון קודם.</div>`;
-    return;
-  }
-  const kind = h.type==='info' ? 'info-c' : (solved.includes(h.id)?'easy':'medium');
-  let html = `<button class="close" aria-label="סגור" onclick="closePanel()">✕</button>
-    <span class="badge ${kind}">${h.type==='info'?'ממצא':(solved.includes(h.id)?'נפתר':'חידה')}</span>
-    <h2>${h.label}</h2>
-    <div class="content" style="--c:var(--${h.type==='info'?'info':'medium'})">${h.content}</div>`;
-  if(h.type==='puzzle'){
-    if(solved.includes(h.id)){
-      html += `<div class="feedback good">✓ נפתר – הקוד: ${h.answer}</div>`;
-    } else {
-      html += `<div class="q">${h.question}</div>`;
-      if(useKeypad(h)){
-        const n = h.answer.length;
-        html += `<div class="slots" id="slots">${Array.from({length:n},(_,i)=>`<div class="slot ${i===input.length?'cur':''}">${input[i]??''}</div>`).join('')}</div>
-          <div class="keypad">${[1,2,3,4,5,6,7,8,9].map(d=>`<button class="key" onclick="press('${d}')">${d}</button>`).join('')}
-          <button class="key" onclick="press('back')">⌫</button><button class="key" onclick="press('0')">0</button>
-          <button class="key ok" onclick="check()">✓</button></div>`;
-      } else {
-        html += `<div class="field"><input id="txt" placeholder="התשובה שלך"></div><button class="btn small" onclick="check()">בדוק תשובה</button>`;
-      }
-      html += `<div class="feedback" id="fb"></div>
-        <div class="panel-actions"><button class="btn ghost small" ${hintShown?'disabled':''} onclick="showHint()">הצג רמז</button></div>
-        ${hintShown?`<div class="hint">💡 ${h.hint}</div>`:''}`;
-    }
-  }
-  panel.innerHTML = html;
-}
-function closePanel(){ selected=null; renderHotspots(); renderPanel(); }
-function press(k){
-  if(!selected) return;
-  if(k==='back') input = input.slice(0,-1);
-  else if(input.length < selected.answer.length) input += k;
-  renderPanel();
-}
-function showHint(){ hintShown = true; hints++; renderPanel(); }
-function check(){
-  const h = selected;
-  const val = useKeypad(h) ? input : (document.getElementById('txt')?.value ?? '');
-  if(val.trim().toLowerCase() === h.answer.trim().toLowerCase()){
-    const slots = document.getElementById('slots'); if(slots) slots.classList.add('flash-ok');
-    setTimeout(()=>{
-      solved.push(h.id); addNote(h);
-      if(h.isFinal){ finish(); return; }
-      renderHotspots(); renderPanel();
-    }, 450);
-  } else {
-    wrong++;
-    const box = document.getElementById('slots') || document.getElementById('txt');
-    box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
-    const fb = document.getElementById('fb'); fb.className='feedback bad'; fb.textContent='התשובה אינה נכונה, נסו שוב.';
-    if(useKeypad(h)){ input=''; setTimeout(renderPanel, 700); }
-  }
-}
-document.addEventListener('keydown', e=>{
-  if(!document.getElementById('play').classList.contains('active') || !selected || !useKeypad(selected) || solved.includes(selected.id)) return;
-  if(/^\d$/.test(e.key)) press(e.key);
-  else if(e.key==='Backspace') press('back');
-  else if(e.key==='Enter') check();
-});
-
-function addNote(h){
-  const li = document.createElement('li');
-  li.style.setProperty('--c', h.type==='info' ? 'var(--info)' : 'var(--easy)');
-  li.innerHTML = h.type==='info'
-    ? `<b>${h.label}</b>${h.content}`
-    : `<b>${h.label} – נפתר</b>הקוד: <code>${h.answer}</code>`;
-  notes.querySelector('.none')?.remove();
-  notes.prepend(li);
-}
-notes.innerHTML = '<li class="none" style="border:0;background:none">עדיין אין ממצאים. כל מידע שתגלו יישמר כאן.</li>';
-
-/* ---------- טיימר: 10 דקות לאחור ---------- */
-let left = 600, tick = null;
-const timerEl = document.getElementById('timer');
-const fmt = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+/* ---------- טיימר ---------- */
 function drawTimer(){
-  timerEl.textContent = fmt(left);
-  timerEl.classList.toggle('warn', left<=120 && left>60);
-  timerEl.classList.toggle('danger', left<=60);
+  $('#timer').textContent=fmt(S.left);
+  $('#timerBox').classList.toggle('warn',S.left<=120&&S.left>60);
+  $('#timerBox').classList.toggle('low',S.left<=60);
 }
 function startTimer(){
-  if(tick || done) return;
-  tick = setInterval(()=>{
-    if(left>0){ left--; drawTimer(); }
-    if(left===0){ clearInterval(tick); toast('הזמן נגמר – (ההתנהגות כאן ממתינה להחלטה)'); }
+  if(S.tick) return;
+  S.tick=setInterval(()=>{
+    if(S.won) return;
+    if(S.left>0){S.left--;drawTimer();}
+    if(S.left===0){clearInterval(S.tick);toast('הזמן נגמר — (ההתנהגות כאן ממתינה להחלטה)');log('הזמן נגמר','bad');}
   },1000);
 }
-document.getElementById('skip').onclick = ()=>{ left = Math.min(left,45); drawTimer(); };
+$('#skip').onclick=()=>{S.left=Math.min(S.left,45);drawTimer();};
 
-function finish(){
-  done = true; clearInterval(tick); selected = null;
-  renderHotspots(); renderPanel();
-  document.getElementById('s-time').textContent = fmt(left);
-  document.getElementById('s-hints').textContent = hints;
-  document.getElementById('s-tries').textContent = wrong;
-  document.getElementById('win').classList.add('show');
+/* ---------- רינדור ---------- */
+function renderAll(){renderProg();renderHots();renderInv();renderHints();drawTimer();}
+function renderProg(){$('#prog').innerHTML=PUZZLES.map(p=>`<i class="${S.solved.includes(p.id)?'on':''}"></i>`).join('');}
+function renderHots(){
+  $('#hots').innerHTML=HOTS.map((h,i)=>`<button type="button" class="hot ${isLocked(h)?'locked':''} ${isDone(h)?'done':''} ${S.sel?.id===h.id?'active':''}"
+    style="left:${h.xPercent}%;top:${h.yPercent}%;--i:${i}" data-h="${h.id}" aria-label="${h.label}">${isLocked(h)?ICON.lock:''}<span>${h.label}</span></button>`).join('');
 }
+function renderInv(newId){
+  const items=[...S.found.map(id=>({id,k:'info'})),...S.solved.map(id=>({id,k:'puzzle'}))];
+  $('#slots').innerHTML=Array.from({length:6},(_,i)=>{const it=items[i];
+    if(!it) return `<div class="slot" aria-hidden="true">ריק</div>`;
+    const h=byId[it.id], c=it.k==='info'?'var(--info)':'var(--easy)';
+    return `<button type="button" class="slot full ${it.id===newId?'new':''}" style="--c:${c}" data-id="${it.id}">${ICON[it.k]}<span>${it.k==='info'?h.label:h.label+' · '+h.answer}</span></button>`;
+  }).join('');
+}
+function renderHints(){
+  const h=S.sel, a=$('#hintArea');
+  if(!h||h.type!=='puzzle'||S.solved.includes(h.id)){a.innerHTML='<div class="muted">פתחו חידה בחדר כדי לבקש עליה רמז.</div>';return;}
+  if(S.hintFor.includes(h.id)) a.innerHTML=`<div class="label" style="color:var(--info)">${h.label}</div><div class="hintbox">${h.hint}</div>`;
+  else { a.innerHTML=`<div class="muted" style="margin-bottom:10px">רמז לחידה: <b style="color:var(--paper)">${h.label}</b></div><button class="btn line sm" id="hAsk">הצג רמז</button>`;
+    $('#hAsk').onclick=()=>{S.hintFor.push(h.id);log(`נחשף רמז: ${h.label}`,'sys');renderHints();}; }
+}
+function log(html,cls=''){const li=document.createElement('li');li.className=cls;li.innerHTML=`<time>${stamp()}</time><span>${html}</span>`;$('#feed').prepend(li);}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),2400);}
 
-renderHotspots(); renderPanel(); drawTimer();
+/* ---------- מגירה ---------- */
+const drawer=$('#drawer');
+function closeDrawer(){drawer.hidden=true;S.sel=null;renderHots();renderHints();}
+$('#dClose').onclick=closeDrawer;
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!drawer.hidden)closeDrawer();});
+$('#hots').addEventListener('click',e=>{const b=e.target.closest('.hot');if(b)openHot(byId[b.dataset.h]);});
+$('#slots').addEventListener('click',e=>{const b=e.target.closest('.slot.full');if(b)openHot(byId[b.dataset.id]);});
+
+function openHot(h){
+  if(S.won) return;
+  if(isLocked(h)){toast('נעול — צריך לפתור קודם: '+byId[h.requiresHotspotId].label);return;}
+  S.sel=h; S.input='';
+  if(h.type==='info'&&!S.found.includes(h.id)){S.found.push(h.id);renderInv(h.id);log(`נמצא: <b>${h.label}</b>`);}
+  $('#dKicker').textContent = h.type==='info'?'ממצא':(S.solved.includes(h.id)?'נפתר':'חידה');
+  $('#dTitle').textContent = h.label;
+  drawBody(); drawer.hidden=false; renderHots(); renderHints();
+}
+function drawBody(){
+  const h=S.sel; let side='';
+  if(h.type==='puzzle'){
+    if(S.solved.includes(h.id)) side=`<div class="fb ok">✓ נפתר · הקוד ${h.answer}</div>`;
+    else if(keypad(h)) side=`<div class="pins" id="pins">${[...h.answer].map((_,i)=>`<i class="${i===S.input.length?'cur':''}">${S.input[i]??''}</i>`).join('')}</div>
+      <div class="keypad">${[1,2,3,4,5,6,7,8,9].map(d=>`<button class="key" data-k="${d}">${d}</button>`).join('')}
+      <button class="key" data-k="back">⌫</button><button class="key" data-k="0">0</button><button class="key ok" data-k="ok">✓</button></div><div class="fb" id="fb"></div>`;
+    else side=`<div class="txt" id="txtWrap"><input id="txt" placeholder="התשובה"><button class="btn sm" data-k="ok">בדיקה</button></div><div class="fb" id="fb"></div>`;
+  }
+  $('#dBody').innerHTML=`<div class="d-grid"><div><div class="paper"><small>${h.type==='info'?'ממצא':'מסמך'}</small>${h.content}</div>
+    ${h.type==='puzzle'&&!S.solved.includes(h.id)?`<div class="q">${h.question}</div>`:''}</div><div>${side}</div></div>`;
+}
+$('#dBody').addEventListener('click',e=>{const k=e.target.closest('[data-k]');if(k)press(k.dataset.k);});
+function press(k){
+  const h=S.sel; if(!h||h.type!=='puzzle'||S.solved.includes(h.id)) return;
+  if(k==='ok') return check();
+  if(k==='back') S.input=S.input.slice(0,-1);
+  else if(S.input.length<h.answer.length) S.input+=k;
+  updatePins();
+}
+function updatePins(){
+  const p=$('#pins'); if(!p) return;
+  [...p.children].forEach((c,i)=>{const v=S.input[i]??''; if(c.textContent!==v&&v){c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop');} c.textContent=v; c.classList.toggle('cur',i===S.input.length);});
+}
+addEventListener('keydown',e=>{
+  if(!$('#play').classList.contains('active')||drawer.hidden||!S.sel||!keypad(S.sel)) return;
+  if(/^\d$/.test(e.key)) press(e.key); else if(e.key==='Backspace') press('back'); else if(e.key==='Enter') press('ok');
+});
+function check(){
+  const h=S.sel, val=keypad(h)?S.input:($('#txt')?.value??'');
+  if(val.trim().toLowerCase()===h.answer.trim().toLowerCase()){
+    $('#pins')?.classList.add('ok'); const fb=$('#fb'); fb.className='fb ok'; fb.textContent='נקש. נפתח!';
+    S.solved.push(h.id); log(`נפתר: <b>${h.label}</b>`,'good');
+    setTimeout(()=>{ renderInv(h.id); renderProg(); renderHots();
+      if(h.isFinal) return win();
+      $('#dKicker').textContent='נפתר'; drawBody(); renderHints(); },650);
+  } else {
+    S.wrong++; log(`ניסיון שגוי: ${h.label}`,'bad');
+    const box=$('#pins')||$('#txtWrap'); box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
+    const fb=$('#fb'); fb.className='fb no'; fb.textContent='המנעול לא זז. ננסה צירוף אחר?';
+    if(keypad(h)){S.input='';setTimeout(updatePins,450);}
+  }
+}
+function win(){
+  S.won=true; clearInterval(S.tick); drawer.hidden=true; S.sel=null; renderHots(); renderHints();
+  $('#wTime').textContent=fmt(S.left); $('#wHints').textContent=S.hintFor.length; $('#wWrong').textContent=S.wrong;
+  log('הכספת נפתחה – יצאתם!','sys');
+  $('#winVeil').hidden=false; observe($('#winVeil'));
+}
+})();
 </script>
 </body>
 </html>
