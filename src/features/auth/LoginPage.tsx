@@ -1,10 +1,11 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import Field from "../../components/common/Field";
 import { useAuth } from "./authContext";
-
-type LoginFormValues = { email: string; password: string };
+import { loginSchema } from "./schemas";
+import type { LoginValues } from "./schemas";
 
 export default function LoginPage() {
   const { user, login } = useAuth();
@@ -16,11 +17,14 @@ export default function LoginPage() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormValues>({ defaultValues: { email: "", password: "" } });
+  } = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
+  });
 
   if (user) return <Navigate to={from} replace />;
 
-  async function onSubmit({ email, password }: LoginFormValues) {
+  async function onSubmit({ email, password }: LoginValues) {
     setFeedback("");
     try {
       await login(email, password);
@@ -31,19 +35,22 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="auth-page" dir="rtl">
+    <main className="auth-page">
       <section className="auth-card" aria-labelledby="login-heading">
         <h1 id="login-heading">התחברות</h1>
 
-        <form className="auth-form" onSubmit={handleSubmit(onSubmit)} onChange={() => setFeedback("")} noValidate>
-          <fieldset disabled={isSubmitting} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
+        <form className="auth-form" onSubmit={handleSubmit(onSubmit)} noValidate>
+          <fieldset
+            disabled={isSubmitting}
+            style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
+          >
             <Field id="login-email" label="אימייל" error={errors.email?.message}>
               <input
                 id="login-email"
                 type="email"
                 dir="ltr"
                 autoComplete="email"
-                {...register("email", { required: "הזן כתובת אימייל" })}
+                {...register("email")}
               />
             </Field>
 
@@ -53,7 +60,7 @@ export default function LoginPage() {
                 type="password"
                 dir="ltr"
                 autoComplete="current-password"
-                {...register("password", { required: "הזן סיסמה" })}
+                {...register("password")}
               />
             </Field>
 
@@ -63,6 +70,9 @@ export default function LoginPage() {
           {feedback && <p role="alert">{feedback}</p>}
         </form>
 
+        <p>
+          <Link to="/forgot-password">שכחת סיסמה?</Link>
+        </p>
         <p>
           אין לך חשבון? <Link to="/register">הרשמה</Link>
         </p>

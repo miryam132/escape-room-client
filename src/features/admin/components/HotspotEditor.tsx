@@ -1,65 +1,65 @@
-import type { MouseEvent } from "react";
+import { useRef } from "react";
+import type { MouseEvent, PointerEvent } from "react";
 
-type HotspotPosition = {
-  xPercent: number;
-  yPercent: number;
-};
+type Position = { xPercent: number; yPercent: number };
 
 type HotspotEditorProps = {
   imageUrl: string;
-  hotspots: (HotspotPosition & { id: string })[];
+  hotspots: (Position & { id: string })[];
   maxHotspots: number;
-  onAdd: (position: HotspotPosition) => void;
+  onAdd: (position: Position) => void;
+  onMove: (index: number, position: Position) => void;
   onRemoveLast: () => void;
 };
+
+const clamp = (value: number) => Math.min(100, Math.max(0, value));
 
 export default function HotspotEditor({
   imageUrl,
   hotspots,
   maxHotspots,
   onAdd,
+  onMove,
   onRemoveLast,
 }: HotspotEditorProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const isFull = hotspots.length >= maxHotspots;
 
-  function handleImageClick(event: MouseEvent<HTMLImageElement>) {
-    if (isFull) return;
+  function toPosition(event: { clientX: number; clientY: number }): Position | null {
+    const { left, top, width, height } = containerRef.current!.getBoundingClientRect();
+    if (width === 0 || height === 0) return null;
+    return {
+      xPercent: clamp(((event.clientX - left) / width) * 100),
+      yPercent: clamp(((event.clientY - top) / height) * 100),
+    };
+  }
 
-    const { left, top, width, height } =
-      event.currentTarget.getBoundingClientRect();
+  function handleImageClick(event: MouseEvent) {
+    const position = !isFull && toPosition(event);
+    if (position) onAdd(position);
+  }
 
-    if (width === 0 || height === 0) return;
-
-    const xPercent = Math.min(
-      100,
-      Math.max(0, ((event.clientX - left) / width) * 100)
-    );
-
-    const yPercent = Math.min(
-      100,
-      Math.max(0, ((event.clientY - top) / height) * 100)
-    );
-
-    onAdd({ xPercent, yPercent });
+  function handleDrag(event: PointerEvent, index: number) {
+    if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
+    const position = toPosition(event);
+    if (position) onMove(index, position);
   }
 
   return (
     <div className="hotspot-editor">
       <p>
         {isFull
-          ? `All ${maxHotspots} hotspots have been placed.`
-          : `Click on the image to place hotspot ${hotspots.length + 1}.`}
+          ? `מוקמו כל ${maxHotspots} הנקודות.`
+          : `לחץ על התמונה כדי למקם את נקודה ${hotspots.length + 1}. אפשר לגרור נקודה כדי להזיז אותה.`}
       </p>
 
-      <div className="hotspot-editor-image-container">
+      <div ref={containerRef} className="hotspot-editor-image-container">
         <img
           src={imageUrl}
-          alt="Room preview for placing hotspots"
+          alt="תצוגה מקדימה למיקום נקודות"
           draggable={false}
           className={
-            isFull
-              ? "hotspot-editor-image"
-              : "hotspot-editor-image hotspot-editor-image-active"
+            isFull ? "hotspot-editor-image" : "hotspot-editor-image hotspot-editor-image-active"
           }
           onClick={handleImageClick}
         />
@@ -68,10 +68,9 @@ export default function HotspotEditor({
           <span
             key={hotspot.id}
             className="hotspot-editor-marker"
-            style={{
-              left: `${hotspot.xPercent}%`,
-              top: `${hotspot.yPercent}%`,
-            }}
+            style={{ left: `${hotspot.xPercent}%`, top: `${hotspot.yPercent}%` }}
+            onPointerDown={(e) => e.currentTarget.setPointerCapture(e.pointerId)}
+            onPointerMove={(e) => handleDrag(e, index)}
           >
             {index + 1}
           </span>
@@ -79,15 +78,11 @@ export default function HotspotEditor({
       </div>
 
       <p>
-        Hotspots: {hotspots.length} / {maxHotspots}
+        נקודות: {hotspots.length} / {maxHotspots}
       </p>
 
-      <button
-        type="button"
-        disabled={hotspots.length === 0}
-        onClick={onRemoveLast}
-      >
-        Remove last hotspot
+      <button type="button" disabled={hotspots.length === 0} onClick={onRemoveLast}>
+        הסר את הנקודה האחרונה
       </button>
     </div>
   );

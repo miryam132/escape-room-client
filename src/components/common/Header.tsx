@@ -7,18 +7,27 @@ export default function Header() {
   return (
     <header>
       <nav>
-        <NavLink to="/" end>Home</NavLink>
-        <NavLink to="/rooms">Rooms</NavLink>
-        {user?.role === "admin" && <NavLink to="/admin/rooms">Admin Rooms</NavLink>}
+        <NavLink to="/" end>
+          בית
+        </NavLink>
+        <NavLink to="/rooms">חדרים</NavLink>
+        {user?.role === "admin" && (
+          <>
+            <NavLink to="/admin/rooms">ניהול חדרים</NavLink>
+            <NavLink to="/admin/users">ניהול משתמשים</NavLink>
+          </>
+        )}
         {user ? (
           <>
-            <span>שלום, {user.name}</span>
-            <button type="button" onClick={logout}>התנתק</button>
+            <NavLink to="/profile">שלום, {user.name}</NavLink>
+            <button type="button" onClick={logout}>
+              התנתק
+            </button>
           </>
         ) : (
           <>
-            <NavLink to="/login">Login</NavLink>
-            <NavLink to="/register">Register</NavLink>
+            <NavLink to="/login">התחברות</NavLink>
+            <NavLink to="/register">הרשמה</NavLink>
           </>
         )}
       </nav>

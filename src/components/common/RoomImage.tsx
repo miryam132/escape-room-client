@@ -5,6 +5,7 @@ type RoomImageProps = {
   alt: string;
   hotspots?: Hotspot[];
   solvedHotspotIds?: string[];
+  lockedHotspotIds?: string[];
   onHotspotClick?: (hotspot: Hotspot) => void;
 };
 
@@ -13,8 +14,16 @@ export function RoomImage({
   alt,
   hotspots = [],
   solvedHotspotIds = [],
+  lockedHotspotIds = [],
   onHotspotClick,
 }: RoomImageProps) {
+  const statusClass = (id: string) =>
+    solvedHotspotIds.includes(id)
+      ? " hotspot-solved"
+      : lockedHotspotIds.includes(id)
+        ? " hotspot-locked"
+        : "";
+
   return (
     <div className="room-image-container">
       <img src={imageUrl} alt={alt} className="room-image" />
@@ -23,9 +32,10 @@ export function RoomImage({
           key={h.id}
           type="button"
           onClick={() => onHotspotClick?.(h)}
-          className={solvedHotspotIds.includes(h.id) ? "hotspot hotspot-solved" : "hotspot"}
+          className={`hotspot${statusClass(h.id)}`}
           style={{ left: `${h.xPercent}%`, top: `${h.yPercent}%` }}
         >
+          {lockedHotspotIds.includes(h.id) && "🔒 "}
           {h.label}
         </button>
       ))}

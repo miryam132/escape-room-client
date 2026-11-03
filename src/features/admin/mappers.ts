@@ -1,30 +1,10 @@
-import type { Category, Difficulty } from "../../types/escapeRoom";
+import type { z } from "zod";
+import type { roomSchema } from "./roomSchema";
 import type { Hotspot } from "../../types/hotspot";
 import type { HotspotInput, RoomInput } from "../../data/roomRepository";
 
-export type HotspotFormValues = {
-  id: string;
-  type: "info" | "puzzle";
-  label: string;
-  xPercent: number;
-  yPercent: number;
-  content: string;
-  requiresHotspotId: string;
-  question: string;
-  answerType: "text" | "number";
-  answer: string;
-  hint: string;
-  isFinal: boolean;
-};
-
-export type RoomFormValues = {
-  title: string;
-  description: string;
-  category: Category;
-  difficulty: Difficulty;
-  imageUrl: string;
-  hotspots: HotspotFormValues[];
-};
+export type RoomFormValues = z.input<typeof roomSchema>;
+export type HotspotFormValues = RoomFormValues["hotspots"][number];
 
 export const EMPTY_HOTSPOT: Omit<HotspotFormValues, "id" | "xPercent" | "yPercent"> = {
   type: "info",

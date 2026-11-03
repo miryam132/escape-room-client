@@ -12,15 +12,15 @@ export default function EditRoom() {
   const room = useRoom(id);
   const hotspots = useRoomHotspots(id);
 
-  if (!id) return <ErrorMessage errorMessage="Missing room ID" />;
+  if (!id) return <ErrorMessage errorMessage="חסר מזהה חדר" />;
   if (room.isPending || hotspots.isPending) return <Loading />;
-  if (room.isError || hotspots.isError) return <ErrorMessage errorMessage="Error loading room" />;
+  if (room.isError || hotspots.isError) return <ErrorMessage errorMessage="שגיאה בטעינת החדר" />;
 
   if (!room.data) {
     return (
       <div>
-        <p>Room not found.</p>
-        <Link to="/admin/rooms">Back to room management</Link>
+        <p>החדר לא נמצא.</p>
+        <Link to="/admin/rooms">חזרה לניהול חדרים</Link>
       </div>
     );
   }
@@ -42,7 +42,7 @@ export default function EditRoom() {
 
   return (
     <>
-      <h1>Edit room: {title}</h1>
+      <h1>עריכת חדר: {title}</h1>
       <RoomForm key={id} initialValues={initialValues} onSave={handleSave} />
     </>
   );

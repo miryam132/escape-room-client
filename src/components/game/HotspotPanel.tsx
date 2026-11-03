@@ -23,7 +23,7 @@ export function HotspotPanel({
   onClose,
 }: HotspotPanelProps) {
   return (
-    <section aria-label={hotspot.label}>
+    <section>
       <h2>{hotspot.label}</h2>
       <p>{hotspot.content}</p>
 
@@ -38,21 +38,15 @@ export function HotspotPanel({
             onChange={onAnswerChange}
           />
 
-          <button
-            type="button"
-            onClick={onShowHint}
-            disabled={isHintVisible}
-          >
-            הצג רמז
+          <button type="button" onClick={onShowHint} disabled={isHintVisible}>
+            הצג רמז (מוריד נקודות)
           </button>
-
           {isHintVisible && <p>{hotspot.hint}</p>}
 
           <button type="button" onClick={onCheckAnswer}>
             בדוק תשובה
           </button>
-
-          <p aria-live="polite">{answerFeedback}</p>
+          <p>{answerFeedback}</p>
         </>
       )}
 

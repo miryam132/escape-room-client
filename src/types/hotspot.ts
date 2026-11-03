@@ -1,4 +1,3 @@
-
 type HotspotBase = {
   id: string;
   roomId: string;

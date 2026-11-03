@@ -5,10 +5,11 @@ import { useDeleteRoom, useRooms } from "../../hooks/rooms";
 export default function AdminRooms() {
   const { data: rooms, isPending, isError } = useRooms();
   const deleteMutation = useDeleteRoom();
-  const successMessage = (useLocation().state as { successMessage?: string } | null)?.successMessage;
+  const successMessage = (useLocation().state as { successMessage?: string } | null)
+    ?.successMessage;
 
   if (isPending) return <Loading />;
-  if (isError) return <ErrorMessage errorMessage="Error loading rooms." />;
+  if (isError) return <ErrorMessage errorMessage="שגיאה בטעינת החדרים." />;
 
   function handleDelete(id: string, title: string) {
     if (window.confirm(`האם אתה בטוח שברצונך למחוק את החדר "${title}"?`)) {
@@ -18,12 +19,10 @@ export default function AdminRooms() {
 
   return (
     <>
-      <h1>Admin Rooms</h1>
+      <h1>ניהול חדרים</h1>
 
       {(successMessage || deleteMutation.isSuccess) && (
-        <p role="status">
-          {deleteMutation.isSuccess ? "החדר נמחק בהצלחה." : successMessage}
-        </p>
+        <p role="status">{deleteMutation.isSuccess ? "החדר נמחק בהצלחה." : successMessage}</p>
       )}
       {deleteMutation.isError && <p role="alert">מחיקת החדר נכשלה. נסה שוב.</p>}
       {rooms.length === 0 && <p>אין חדרים להצגה.</p>}
@@ -33,14 +32,15 @@ export default function AdminRooms() {
       <ul>
         {rooms.map((room) => (
           <li key={room.id}>
-            <span>{room.title}</span>{" "}
-            <Link to={`/admin/rooms/${room.id}/edit`}>עריכה</Link>
+            <span>{room.title}</span> <Link to={`/admin/rooms/${room.id}/edit`}>עריכה</Link>
             <button
               type="button"
               onClick={() => handleDelete(room.id, room.title)}
               disabled={deleteMutation.isPending}
             >
-              {deleteMutation.isPending && deleteMutation.variables === room.id ? "מוחק..." : "מחיקה"}
+              {deleteMutation.isPending && deleteMutation.variables === room.id
+                ? "מוחק..."
+                : "מחיקה"}
             </button>
           </li>
         ))}

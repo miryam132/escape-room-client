@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { GameStats } from "../lib/score";
 import type { Hotspot } from "../types/hotspot";
 
 export const isAnswerCorrect = (hotspot: Hotspot, input: string) => {
@@ -13,51 +14,93 @@ export const isAnswerCorrect = (hotspot: Hotspot, input: string) => {
   return given === expected;
 };
 
-export function useGame(hotspots: Hotspot[]) {
-  const [selected, setSelected] = useState<Hotspot | null>(null);
-  const [solvedIds, setSolvedIds] = useState<string[]>([]);
-  const [answer, setAnswer] = useState("");
-  const [feedback, setFeedback] = useState("");
-  const [isHintVisible, setIsHintVisible] = useState(false);
+const initialState = () => ({
+  selectedId: null as string | null,
+  solvedIds: [] as string[],
+  hintedIds: [] as string[],
+  wrongAnswers: 0,
+  answer: "",
+  feedback: "",
+  startedAt: Date.now(),
+  finishedSeconds: null as number | null,
+});
 
-  const isCompleted = hotspots.some((h) => h.type === "puzzle" && h.isFinal && solvedIds.includes(h.id));
+export function useGame(hotspots: Hotspot[], onComplete?: (stats: GameStats) => void) {
+  const [state, setState] = useState(initialState);
+  const [now, setNow] = useState(Date.now);
+  const { selectedId, solvedIds, hintedIds, wrongAnswers, answer, feedback, finishedSeconds } =
+    state;
 
-  function select(hotspot: Hotspot | null) {
-    if (hotspot?.requiresHotspotId && !solvedIds.includes(hotspot.requiresHotspotId)) {
+  const isCompleted = finishedSeconds !== null;
+  const selected = hotspots.find((h) => h.id === selectedId) ?? null;
+  const seconds = finishedSeconds ?? Math.max(0, Math.floor((now - state.startedAt) / 1000));
+  const lockedIds = hotspots
+    .filter((h) => h.requiresHotspotId && !solvedIds.includes(h.requiresHotspotId))
+    .map((h) => h.id);
+
+  useEffect(() => {
+    if (isCompleted) return;
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [isCompleted]);
+
+  const patch = (changes: Partial<ReturnType<typeof initialState>>) =>
+    setState((prev) => ({ ...prev, ...changes }));
+
+  function select(hotspot: Hotspot) {
+    if (isCompleted) return;
+
+    if (lockedIds.includes(hotspot.id)) {
       const required = hotspots.find((h) => h.id === hotspot.requiresHotspotId);
-      setSelected(null);
-      setFeedback(`צריך לפתור קודם: ${required?.label ?? "החידה הקודמת"}`);
+      patch({
+        selectedId: null,
+        feedback: `צריך לפתור קודם: ${required?.label ?? "החידה הקודמת"}`,
+      });
       return;
     }
-    setAnswer("");
-    setFeedback("");
-    setIsHintVisible(false);
-    setSelected(hotspot);
+    patch({ selectedId: hotspot.id, answer: "", feedback: "" });
   }
 
   function check() {
     if (!selected) return;
 
     if (!isAnswerCorrect(selected, answer)) {
-      setFeedback("התשובה אינה נכונה, נסה שוב.");
+      patch({ wrongAnswers: wrongAnswers + 1, feedback: "התשובה אינה נכונה, נסה שוב." });
       return;
     }
-    setFeedback("תשובה נכונה!");
-    setSolvedIds((ids) => (ids.includes(selected.id) ? ids : [...ids, selected.id]));
-    if (selected.type === "puzzle" && selected.isFinal) setSelected(null);
+
+    const newSolved = solvedIds.includes(selected.id) ? solvedIds : [...solvedIds, selected.id];
+    if (selected.type === "puzzle" && selected.isFinal) {
+      const finalSeconds = Math.floor((Date.now() - state.startedAt) / 1000);
+      patch({ solvedIds: newSolved, selectedId: null, finishedSeconds: finalSeconds });
+      onComplete?.({ seconds: finalSeconds, hintsUsed: hintedIds.length, wrongAnswers });
+    } else {
+      patch({ solvedIds: newSolved, feedback: "תשובה נכונה!" });
+    }
   }
 
   return {
     selected,
     solvedIds,
+    lockedIds,
     answer,
     feedback,
-    isHintVisible,
+    seconds,
+    hintsUsed: hintedIds.length,
+    wrongAnswers,
     isCompleted,
-    select: (h: Hotspot) => !isCompleted && select(h),
-    close: () => setSelected(null),
+    isHintVisible: selectedId !== null && hintedIds.includes(selectedId),
+    select,
     check,
-    setAnswer,
-    showHint: () => setIsHintVisible(true),
+    close: () => patch({ selectedId: null }),
+    setAnswer: (value: string) => patch({ answer: value }),
+    showHint: () =>
+      selectedId &&
+      !hintedIds.includes(selectedId) &&
+      patch({ hintedIds: [...hintedIds, selectedId] }),
+    reset: () => {
+      setState(initialState());
+      setNow(Date.now());
+    },
   };
 }

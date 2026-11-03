@@ -16,8 +16,7 @@ export const queryKeys = {
   hotspots: (roomId: string) => ["hotspots", roomId] as const,
 };
 
-export const useRooms = () =>
-  useQuery({ queryKey: queryKeys.rooms, queryFn: getRooms });
+export const useRooms = () => useQuery({ queryKey: queryKeys.rooms, queryFn: getRooms });
 
 export const useRoom = (id = "") =>
   useQuery({

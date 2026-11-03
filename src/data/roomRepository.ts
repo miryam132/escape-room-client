@@ -25,10 +25,7 @@ export async function getHotspotsByRoomId(roomId: string) {
   return hotspots.filter((hotspot) => hotspot.roomId === roomId);
 }
 
-export async function createRoom(
-  roomData: RoomInput,
-  roomHotspots: HotspotInput[],
-) {
+export async function createRoom(roomData: RoomInput, roomHotspots: HotspotInput[]) {
   const room: Room = {
     ...roomData,
     id: crypto.randomUUID(),
@@ -46,11 +43,7 @@ export async function createRoom(
   return room;
 }
 
-export async function updateRoom(
-  id: string,
-  roomData: RoomInput,
-  roomHotspots: HotspotInput[],
-) {
+export async function updateRoom(id: string, roomData: RoomInput, roomHotspots: HotspotInput[]) {
   const index = findRoomIndex(id);
 
   const updatedRoom: Room = {

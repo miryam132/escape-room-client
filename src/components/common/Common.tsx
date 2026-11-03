@@ -6,13 +6,11 @@ export const ErrorMessage = ({ errorMessage }: { errorMessage: string }) => (
 
 export const Loading = () => (
   <div className="loading">
-    <p>Loading...</p>
+    <p>טוען...</p>
   </div>
 );
 
-export const Badge = ({ text }: { text: string }) => (
-  <span className="badge">{text}</span>
-);
+export const Badge = ({ text }: { text: string }) => <span className="badge">{text}</span>;
 
 type TextInputProps = {
   id: string;

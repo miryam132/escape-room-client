@@ -14,7 +14,7 @@ export default function NewRoom() {
 
   return (
     <>
-      <h1>Create room</h1>
+      <h1>יצירת חדר</h1>
       <RoomForm onSave={handleSave} />
     </>
   );

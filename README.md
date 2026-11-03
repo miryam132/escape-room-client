@@ -1,75 +1,42 @@
-# React + TypeScript + Vite
+# Mysteria – חדרי בריחה
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+אפליקציית React לחדרי בריחה: שחקנים פותרים חידות על גבי תמונת החדר, והמנהל בונה חדרים ונקודות (hotspots).
 
-Currently, two official plugins are available:
+## הרצה
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
+npm run dev      # שרת פיתוח
+npm test         # בדיקות (vitest)
+npm run lint     # ESLint
+npm run format   # Prettier
+npm run build    # בדיקת טיפוסים + בנייה
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+## טכנולוגיות
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+React 19, TypeScript, Vite, React Router, TanStack Query, React Hook Form + Zod.
+האתר בעברית ו־RTL.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## מבנה
 
 ```
+src/
+  app/          ראוטר (עם טעינה עצלה) ו־queryClient
+  components/   קומפוננטות משותפות ורכיבי משחק
+  features/     admin · auth · game · home · rooms
+  hooks/        useGame, וחיבור ל־react-query (rooms, users, results)
+  data/         שכבת נתונים (כרגע דמה בזיכרון / localStorage)
+  lib/          פונקציות טהורות: ניקוד, זיהוי מעגלים
+```
+
+## משתמשים
+
+- יש **מנהל אחד בלבד**. הרשמה יוצרת תמיד משתמש רגיל.
+- בגרסת הדמה המנהל נוצר אוטומטית: `admin@mysteria.local` / `admin1234`.
+  זה זמני – כשמתחברים לשרת, תפקיד המנהל נקבע בשרת בלבד.
+- הנתונים ב־`src/data/*Repository.ts` הם דמה. החיבור לשרת יחליף רק את הקבצים האלה.
+
+## ניקוד
+
+1000 נקודות, פחות שנייה אחת לכל שנייה, 50 לכל רמז ו־20 לכל תשובה שגויה (ראו `constants.ts`).

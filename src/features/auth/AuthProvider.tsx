@@ -17,6 +17,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           auth.logout();
           setUser(null);
         },
+        updateName: async (name) => setUser(await auth.updateName(user!.id, name)),
+        changePassword: (current, next) => auth.changePassword(user!.id, current, next),
       }}
     >
       {children}
