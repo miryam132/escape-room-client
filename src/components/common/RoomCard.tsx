@@ -1,6 +1,6 @@
-import type { EscapeRoom } from "../../types/escapeRoom.ts";
+import type { EscapeRoom } from "../../types/escapeRoom";
 import { Link } from "react-router-dom";
-import { Badge } from "./Common.tsx";
+import { Badge } from "./Common";
 export function RoomCard({room}:{room:EscapeRoom}) {
     return (
         <article className="room-card">

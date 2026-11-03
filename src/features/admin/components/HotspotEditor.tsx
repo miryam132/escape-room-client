@@ -70,7 +70,7 @@ export default function HotspotEditor({
             className="hotspot-editor-marker"
             style={{
               left: `${hotspot.xPercent}%`,
-              top: `${hotspot.yPercent }%`,
+              top: `${hotspot.yPercent}%`,
             }}
           >
             {index + 1}

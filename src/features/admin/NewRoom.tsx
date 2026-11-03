@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import RoomForm from "../../components/common/admin/RoomForms";
-import type { RoomFormValues } from "../../components/common/admin/RoomForms";
-import { useSaveRoom } from "../../hooks/useRoomEditor";
+import { useSaveRoom } from "../../hooks/rooms";
+import RoomForm from "./components/RoomForm";
+import type { RoomFormValues } from "./mappers";
 
 export default function NewRoom() {
   const navigate = useNavigate();
@@ -9,10 +9,7 @@ export default function NewRoom() {
 
   async function handleSave(values: RoomFormValues) {
     await saveRoom.mutateAsync(values);
-
-    navigate("/admin/rooms", {
-      state: { successMessage: "החדר נוצר בהצלחה" },
-    });
+    navigate("/admin/rooms", { state: { successMessage: "החדר נוצר בהצלחה" } });
   }
 
   return (

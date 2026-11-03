@@ -23,7 +23,7 @@ export function HotspotPanel({
   onClose,
 }: HotspotPanelProps) {
   return (
-    <section>
+    <section aria-label={hotspot.label}>
       <h2>{hotspot.label}</h2>
       <p>{hotspot.content}</p>
 
@@ -32,7 +32,7 @@ export function HotspotPanel({
           <p>{hotspot.question}</p>
 
           <TextInput
-            id={hotspot.id}
+            id={`answer-${hotspot.id}`}
             label="התשובה שלך"
             value={userAnswer}
             onChange={onAnswerChange}

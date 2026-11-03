@@ -1,22 +1,14 @@
-import { ErrorMessage, Loading, Badge } from "../../components/common/Common";
-import { useRoom } from "../../hooks/useRoom";
-import { useParams, Link } from "react-router-dom";
-import "../../index.css";
+import { Link, useParams } from "react-router-dom";
+import { Badge, ErrorMessage, Loading } from "../../components/common/Common";
 import { RoomImage } from "../../components/common/RoomImage";
-import { hotspots } from "../../data/hotspot";
+import { useRoom } from "../../hooks/rooms";
 
-function RoomDetailsPage() {
+export default function RoomDetailsPage() {
   const { id } = useParams();
-  const { data: room, isPending, isError } = useRoom(id!);
+  const { data: room, isPending, isError } = useRoom(id);
 
-  if (isPending) {
-    return <Loading />;
-  }
-
-  if (isError) {
-    return <ErrorMessage errorMessage="Error loading room details." />;
-  }
-
+  if (isPending) return <Loading />;
+  if (isError) return <ErrorMessage errorMessage="Error loading room details." />;
   if (!room) {
     return (
       <>
@@ -26,23 +18,14 @@ function RoomDetailsPage() {
     );
   }
 
-  const roomHotspots = hotspots.filter((hotspot) => hotspot.roomId === room.id);
-
   return (
     <>
       <h1>{room.title}</h1>
-      <RoomImage
-        imageUrl={room.imageUrl}
-        hotspots={roomHotspots}
-        solvedHotspotIds={[]}
-        onHotspotClick={() => {}}
-      />
+      <RoomImage imageUrl={room.imageUrl} alt={room.title} />
       <p>{room.description}</p>
       <Badge text={room.difficulty} />
       <Badge text={room.category} />
-      <Link to={"/play/" + room.id}>Start to play</Link>
+      <Link to={`/play/${room.id}`}>Start to play</Link>
     </>
   );
 }
-
-export default RoomDetailsPage;

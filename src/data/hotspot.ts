@@ -25,8 +25,8 @@ export const hotspots: Hotspot[] = [
     id: "hotspot-2",
     roomId: "room-1",
     label: "הארון",
-    xPercent: 25,
-    yPercent: 40,
+    xPercent: 20,
+    yPercent: 30,
     type: "info",
     content:
         "הארון נפתח. בפנים נמצא תיק חקירה ובו המסמכים להמשך החקירה.",
@@ -36,8 +36,8 @@ export const hotspots: Hotspot[] = [
   id: "hotspot-3",
   roomId: "room-1",
   label: "תיק החקירה",
-  xPercent: 30,
-  yPercent: 45,
+  xPercent: 35,
+  yPercent: 62,
   type: "puzzle",
   content:
     "בתיק נמצא מסמך עם כתובת שנמחקה בחלקה: " +

@@ -1,13 +1,34 @@
-import type{ Hotspot } from "../../types/hotspot"
-import "../../index.css"
-export function RoomImage ({imageUrl,hotspots,solvedHotspotIds,onHotspotClick}:
-    {imageUrl:string,hotspots:Hotspot[],solvedHotspotIds:string[],onHotspotClick:(hotspot:Hotspot)=>void}){
-    return  <div className="room-image-container">
-        <img src={imageUrl} className="room-image"/>
-        {hotspots.map(pot=>
-        <button key={pot.id} onClick={()=>onHotspotClick(pot)} className= {solvedHotspotIds.includes(pot.id)? "hotspot hotspot-solved" :"hotspot"}
-            style={{left: pot.xPercent + "%", top: pot.yPercent + "%"}}>
-            {pot.label}</button>)}
-     </div>
+import type { Hotspot } from "../../types/hotspot";
 
+type RoomImageProps = {
+  imageUrl: string;
+  alt: string;
+  hotspots?: Hotspot[];
+  solvedHotspotIds?: string[];
+  onHotspotClick?: (hotspot: Hotspot) => void;
+};
+
+export function RoomImage({
+  imageUrl,
+  alt,
+  hotspots = [],
+  solvedHotspotIds = [],
+  onHotspotClick,
+}: RoomImageProps) {
+  return (
+    <div className="room-image-container">
+      <img src={imageUrl} alt={alt} className="room-image" />
+      {hotspots.map((h) => (
+        <button
+          key={h.id}
+          type="button"
+          onClick={() => onHotspotClick?.(h)}
+          className={solvedHotspotIds.includes(h.id) ? "hotspot hotspot-solved" : "hotspot"}
+          style={{ left: `${h.xPercent}%`, top: `${h.yPercent}%` }}
+        >
+          {h.label}
+        </button>
+      ))}
+    </div>
+  );
 }

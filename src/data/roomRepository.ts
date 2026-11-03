@@ -1,17 +1,17 @@
 import { rooms } from "./rooms";
 import { hotspots } from "./hotspot";
 import type { Hotspot } from "../types/hotspot";
+import type { EscapeRoom } from "../types/escapeRoom";
 
-type Room = (typeof rooms)[number];
+type Room = EscapeRoom;
 
-export type RoomInput = Pick<
-  Room,
-  "title" | "description" | "category" | "difficulty" | "imageUrl"
->;
+export type RoomInput = Omit<Room, "id" | "createdAt">;
 
-export type HotspotInput =
-  | Omit<Extract<Hotspot, { type: "info" }>, "roomId">
-  | Omit<Extract<Hotspot, { type: "puzzle" }>, "roomId">;
+export type HotspotInput = Hotspot extends infer H
+  ? H extends Hotspot
+    ? Omit<H, "roomId">
+    : never
+  : never;
 
 export async function getRooms() {
   return [...rooms];
@@ -51,11 +51,7 @@ export async function updateRoom(
   roomData: RoomInput,
   roomHotspots: HotspotInput[],
 ) {
-  const index = rooms.findIndex((room) => room.id === id);
-
-  if (index === -1) {
-    throw new Error("החדר לא נמצא");
-  }
+  const index = findRoomIndex(id);
 
   const updatedRoom: Room = {
     ...rooms[index],
@@ -78,20 +74,20 @@ export async function updateRoom(
 }
 
 export async function deleteRoom(id: string) {
-  const index = rooms.findIndex((room) => room.id === id);
-
-  if (index === -1) {
-    throw new Error("החדר לא נמצא");
-  }
+  const index = findRoomIndex(id);
 
   rooms.splice(index, 1);
   removeRoomHotspots(id);
 }
 
+function findRoomIndex(id: string) {
+  const index = rooms.findIndex((room) => room.id === id);
+  if (index === -1) throw new Error("החדר לא נמצא");
+  return index;
+}
+
 function removeRoomHotspots(roomId: string) {
   for (let index = hotspots.length - 1; index >= 0; index--) {
-    if (hotspots[index].roomId === roomId) {
-      hotspots.splice(index, 1);
-    }
+    if (hotspots[index].roomId === roomId) hotspots.splice(index, 1);
   }
 }
