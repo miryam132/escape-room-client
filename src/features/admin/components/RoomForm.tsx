@@ -3,7 +3,7 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { CATEGORIES, DIFFICULTIES, MAX_HOTSPOTS, MIN_HOTSPOTS, ROOM_IMAGES } from "../../../constants";
 import { EMPTY_HOTSPOT } from "../mappers";
 import type { RoomFormValues } from "../mappers";
-import Field from "./Field";
+import Field from "../../../components/common/Field";
 import HotspotEditor from "./HotspotEditor";
 import HotspotFields from "./HotspotFields";
 

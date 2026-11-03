@@ -1,16 +1,27 @@
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../../features/auth/authContext";
 
-function Header() {
-  return ( 
+export default function Header() {
+  const { user, logout } = useAuth();
+
+  return (
     <header>
       <nav>
         <NavLink to="/" end>Home</NavLink>
-        <NavLink to="/login">Login</NavLink>
         <NavLink to="/rooms">Rooms</NavLink>
-        <NavLink to="/admin/rooms">Admin Rooms</NavLink>
+        {user?.role === "admin" && <NavLink to="/admin/rooms">Admin Rooms</NavLink>}
+        {user ? (
+          <>
+            <span>שלום, {user.name}</span>
+            <button type="button" onClick={logout}>התנתק</button>
+          </>
+        ) : (
+          <>
+            <NavLink to="/login">Login</NavLink>
+            <NavLink to="/register">Register</NavLink>
+          </>
+        )}
       </nav>
     </header>
   );
 }
-
-export default Header;

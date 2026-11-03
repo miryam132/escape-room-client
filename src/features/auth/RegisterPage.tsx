@@ -1,15 +1,21 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import Field from "../../components/common/Field";
+import type { Role } from "../../types/user";
+import { useAuth } from "./authContext";
 
 type RegisterFormValues = {
   name: string;
   email: string;
   password: string;
   confirmPassword: string;
+  role: Role;
 };
 
 export default function RegisterPage() {
+  const { register: registerUser } = useAuth();
+  const navigate = useNavigate();
   const [feedback, setFeedback] = useState("");
 
   const {
@@ -17,18 +23,18 @@ export default function RegisterPage() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormValues>({
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
+    defaultValues: { name: "", email: "", password: "", confirmPassword: "", role: "user" },
   });
 
-  function onSubmit() {
-    setFeedback(
-      "הפרטים תקינים. החשבון עדיין לא נוצר — ההרשמה טרם חוברה לשרת.",
-    );
+  async function onSubmit({ name, email, password, role }: RegisterFormValues) {
+    const values = { name, email, password, role };
+    setFeedback("");
+    try {
+      await registerUser(values);
+      navigate(values.role === "admin" ? "/admin/rooms" : "/rooms", { replace: true });
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "ההרשמה נכשלה");
+    }
   }
 
   return (
@@ -37,180 +43,77 @@ export default function RegisterPage() {
         <h1 id="register-heading">הרשמה ל־Mysteria</h1>
         <p>מלא את הפרטים ליצירת חשבון.</p>
 
-        <form
-          className="auth-form"
-          onSubmit={handleSubmit(onSubmit, () => setFeedback(""))}
-          onChange={() => setFeedback("")}
-          noValidate
-        >
-          <fieldset
-            disabled={isSubmitting}
-            style={{
-              border: 0,
-              padding: 0,
-              margin: 0,
-              minWidth: 0,
-            }}
-          >
-            <div className="form-field">
-              <label htmlFor="register-name">שם</label>
-
+        <form className="auth-form" onSubmit={handleSubmit(onSubmit)} onChange={() => setFeedback("")} noValidate>
+          <fieldset disabled={isSubmitting} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
+            <Field id="register-name" label="שם" error={errors.name?.message}>
               <input
                 id="register-name"
-                type="text"
                 autoComplete="name"
-                placeholder="השם שלך"
-                aria-invalid={Boolean(errors.name)}
-                aria-describedby={
-                  errors.name ? "register-name-error" : undefined
-                }
                 {...register("name", {
-                  validate: (value) =>
-                    value.trim().length >= 2 ||
-                    "הזן שם באורך שני תווים לפחות",
+                  validate: (v) => v.trim().length >= 2 || "הזן שם באורך שני תווים לפחות",
                 })}
               />
+            </Field>
 
-              {errors.name && (
-                <p
-                  id="register-name-error"
-                  className="form-error"
-                  role="alert"
-                >
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
-
-            <div className="form-field">
-              <label htmlFor="register-email">אימייל</label>
-
+            <Field id="register-email" label="אימייל" error={errors.email?.message}>
               <input
                 id="register-email"
                 type="email"
+                dir="ltr"
                 autoComplete="email"
                 placeholder="name@example.com"
-                dir="ltr"
-                aria-invalid={Boolean(errors.email)}
-                aria-describedby={
-                  errors.email ? "register-email-error" : undefined
-                }
                 {...register("email", {
-                  setValueAs: (value: string) => value.trim(),
+                  setValueAs: (v: string) => v.trim(),
                   required: "הזן כתובת אימייל",
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "הזן כתובת אימייל תקינה",
-                  },
+                  pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "הזן כתובת אימייל תקינה" },
                 })}
               />
+            </Field>
 
-              {errors.email && (
-                <p
-                  id="register-email-error"
-                  className="form-error"
-                  role="alert"
-                >
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-
-            <div className="form-field">
-              <label htmlFor="register-password">סיסמה</label>
-
+            <Field id="register-password" label="סיסמה (לפחות 8 תווים)" error={errors.password?.message}>
               <input
                 id="register-password"
                 type="password"
-                autoComplete="new-password"
                 dir="ltr"
-                aria-invalid={Boolean(errors.password)}
-                aria-describedby={
-                  errors.password
-                    ? "register-password-help register-password-error"
-                    : "register-password-help"
-                }
+                autoComplete="new-password"
                 {...register("password", {
                   required: "הזן סיסמה",
-                  minLength: {
-                    value: 8,
-                    message: "הסיסמה חייבת להכיל לפחות 8 תווים",
-                  },
-                  validate: (value) =>
-                    value.trim().length > 0 ||
-                    "הסיסמה לא יכולה להכיל רווחים בלבד",
+                  minLength: { value: 8, message: "הסיסמה חייבת להכיל לפחות 8 תווים" },
+                  validate: (v) => v.trim().length > 0 || "הסיסמה לא יכולה להכיל רווחים בלבד",
                   deps: ["confirmPassword"],
                 })}
               />
+            </Field>
 
-              <p id="register-password-help">
-                לפחות 8 תווים.
-              </p>
-
-              {errors.password && (
-                <p
-                  id="register-password-error"
-                  className="form-error"
-                  role="alert"
-                >
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-
-            <div className="form-field">
-              <label htmlFor="register-confirm-password">
-                אימות סיסמה
-              </label>
-
+            <Field id="register-confirm-password" label="אימות סיסמה" error={errors.confirmPassword?.message}>
               <input
                 id="register-confirm-password"
                 type="password"
-                autoComplete="new-password"
                 dir="ltr"
-                aria-invalid={Boolean(errors.confirmPassword)}
-                aria-describedby={
-                  errors.confirmPassword
-                    ? "register-confirm-password-error"
-                    : undefined
-                }
+                autoComplete="new-password"
                 {...register("confirmPassword", {
                   required: "הזן שוב את הסיסמה",
-                  validate: (value, values) =>
-                    value === values.password ||
-                    "הסיסמאות אינן תואמות",
+                  validate: (v, values) => v === values.password || "הסיסמאות אינן תואמות",
                 })}
               />
+            </Field>
 
-              {errors.confirmPassword && (
-                <p
-                  id="register-confirm-password-error"
-                  className="form-error"
-                  role="alert"
-                >
-                  {errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
+            <Field id="register-role" label="סוג משתמש">
+              <select id="register-role" {...register("role")}>
+                <option value="user">משתמש רגיל</option>
+                <option value="admin">מנהל</option>
+              </select>
+            </Field>
 
-            <button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "בודק..." : "בדוק פרטי הרשמה"}
-            </button>
+            <button type="submit">{isSubmitting ? "יוצר חשבון..." : "הרשמה"}</button>
           </fieldset>
 
-          {feedback && (
-            <p className="form-feedback" role="status">
-              {feedback}
-            </p>
-          )}
+          {feedback && <p role="alert">{feedback}</p>}
         </form>
 
         <p>
-          כבר יש לך חשבון?{" "}
-          <Link to="/login">התחבר</Link>
+          כבר יש לך חשבון? <Link to="/login">התחבר</Link>
         </p>
-
-        <Link to="/rooms">חזרה לחדרים</Link>
       </section>
     </main>
   );

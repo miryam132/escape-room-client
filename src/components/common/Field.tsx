@@ -9,7 +9,7 @@ type FieldProps = {
 
 export default function Field({ id, label, error, children }: FieldProps) {
   return (
-    <div>
+    <div className="form-field">
       <label htmlFor={id}>{label}</label>
       {children}
       {error && <p role="alert">{error}</p>}

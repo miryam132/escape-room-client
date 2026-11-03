@@ -1,5 +1,5 @@
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
-import Field from "./Field";
+import Field from "../../../components/common/Field";
 import type { HotspotFormValues, RoomFormValues } from "../mappers";
 
 type Props = {
