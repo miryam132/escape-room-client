@@ -8,6 +8,7 @@ import PlayPage from "../features/game/PlayPage";
 import AdminRooms from "../features/admin/AdminRooms";
 import NewRoom from "../features/admin/NewRoom";
 import EditRoom from "../features/admin/EditRoom";
+import RequireRole from "../features/auth/RequireRole";
 import NotFound from "../components/common/NotFound";
 
 export function AppRoutes() {
@@ -19,10 +20,12 @@ export function AppRoutes() {
       <Route path="/play/:id" element={<PlayPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      <Route path="/admin" element={<Navigate to="/admin/rooms" replace />} />
-      <Route path="/admin/rooms" element={<AdminRooms />} />
-      <Route path="/admin/rooms/new" element={<NewRoom />} />
-      <Route path="/admin/rooms/:id/edit" element={<EditRoom />} />
+      <Route element={<RequireRole role="admin" />}>
+        <Route path="/admin" element={<Navigate to="/admin/rooms" replace />} />
+        <Route path="/admin/rooms" element={<AdminRooms />} />
+        <Route path="/admin/rooms/new" element={<NewRoom />} />
+        <Route path="/admin/rooms/:id/edit" element={<EditRoom />} />
+      </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
