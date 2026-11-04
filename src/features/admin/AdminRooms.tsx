@@ -29,9 +29,11 @@ export default function AdminRooms() {
       )}
       {data.items.length === 0 && <p>אין חדרים להצגה.</p>}
 
-      <Link to="/admin/rooms/new">צור חדר חדש</Link>
+      <Link to="/admin/rooms/new" className="btn btn-primary">
+        צור חדר חדש
+      </Link>
 
-      <ul>
+      <ul className="admin-list">
         {data.items.map((room) => (
           <li key={room.id}>
             <span>{room.title}</span>

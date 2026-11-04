@@ -19,8 +19,10 @@ export function RoomImage({ imageUrl, alt, hotspots = [], onHotspotClick }: Room
           className={`hotspot hotspot-${h.state.toLowerCase()}`}
           style={{ left: `${h.xpercent}%`, top: `${h.ypercent}%` }}
         >
-          {h.state === "LOCKED" && "🔒 "}
-          {h.label}
+          <span className="hotspot-label">
+            {h.state === "LOCKED" && "🔒 "}
+            {h.label}
+          </span>
         </button>
       ))}
     </div>

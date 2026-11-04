@@ -6,10 +6,11 @@ export default function Header() {
 
   return (
     <header>
+      <NavLink to="/" className="brand" end>
+        Mysteria<span aria-hidden="true">◆</span>
+      </NavLink>
+
       <nav>
-        <NavLink to="/" end>
-          בית
-        </NavLink>
         <NavLink to="/rooms">חדרים</NavLink>
         {user?.role === "ADMIN" && (
           <>
@@ -17,20 +18,25 @@ export default function Header() {
             <NavLink to="/admin/users">ניהול משתמשים</NavLink>
           </>
         )}
+      </nav>
+
+      <div className="header-user">
         {user ? (
           <>
-            <NavLink to="/profile">שלום, {user.name}</NavLink>
-            <button type="button" onClick={logout}>
+            <NavLink to="/profile">{user.name}</NavLink>
+            <button type="button" className="btn-ghost" onClick={logout}>
               התנתק
             </button>
           </>
         ) : (
           <>
             <NavLink to="/login">התחברות</NavLink>
-            <NavLink to="/register">הרשמה</NavLink>
+            <NavLink to="/register" className="btn btn-primary">
+              הרשמה
+            </NavLink>
           </>
         )}
-      </nav>
+      </div>
     </header>
   );
 }
