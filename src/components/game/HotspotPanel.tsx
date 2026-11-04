@@ -27,7 +27,7 @@ export function HotspotPanel({
   const isOpen = hotspot.state === "AVAILABLE" && hotspot.type === "PUZZLE";
 
   return (
-    <section>
+    <section className="panel">
       <h2>{hotspot.label}</h2>
 
       {hotspot.state === "LOCKED" ? (

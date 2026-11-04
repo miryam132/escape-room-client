@@ -70,12 +70,32 @@ function Board({ room, game }: { room: RoomSummary; game: Game }) {
   }
 
   return (
-    <div>
+    <div className="play">
       <h1>{room.title}</h1>
-      <p>
-        ⏱ {formatTime(seconds)} · נפתרו {game.solvedCount} מתוך {game.totalPuzzles} חידות
-        {!isCompleted && ` · רמזים: ${Object.keys(hints).length} · טעויות: ${wrongAnswers}`}
-      </p>
+      <div className="hud">
+        <span className="chip">
+          <small>זמן</small>
+          <b>{formatTime(seconds)}</b>
+        </span>
+        <span className="chip">
+          <small>חידות</small>
+          <b>
+            {game.solvedCount}/{game.totalPuzzles}
+          </b>
+        </span>
+        {!isCompleted && (
+          <>
+            <span className="chip">
+              <small>רמזים</small>
+              <b>{Object.keys(hints).length}</b>
+            </span>
+            <span className="chip">
+              <small>טעויות</small>
+              <b>{wrongAnswers}</b>
+            </span>
+          </>
+        )}
+      </div>
 
       <RoomImage
         imageUrl={room.imageUrl}
@@ -85,7 +105,7 @@ function Board({ room, game }: { room: RoomSummary; game: Game }) {
       />
 
       {isCompleted ? (
-        <section role="status">
+        <section role="status" className="victory">
           <h2>כל הכבוד! השלמת את החדר</h2>
           {hotspot.data?.content && (
             <p style={{ whiteSpace: "pre-line" }}>{hotspot.data.content}</p>

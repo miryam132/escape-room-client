@@ -45,7 +45,7 @@ export default function RoomsPage() {
       <h1>חדרי בריחה</h1>
       <p>בחרו חדר והתחילו לשחק.</p>
 
-      <div>
+      <div className="filters">
         <TextInput
           id="room-search"
           label="חיפוש חדר"
@@ -54,39 +54,47 @@ export default function RoomsPage() {
           placeholder="הקלד שם או תיאור..."
         />
 
-        <label htmlFor="category-filter">קטגוריה</label>
-        <input
-          id="category-filter"
-          list="category-options"
-          value={category}
-          onChange={(e) => setParam("category", e.target.value)}
-        />
-        <datalist id="category-options">
-          {SUGGESTED_CATEGORIES.map((c) => (
-            <option key={c} value={c} />
-          ))}
-        </datalist>
+        <div>
+          <label htmlFor="category-filter">קטגוריה</label>
+          <input
+            id="category-filter"
+            list="category-options"
+            value={category}
+            onChange={(e) => setParam("category", e.target.value)}
+          />
+          <datalist id="category-options">
+            {SUGGESTED_CATEGORIES.map((c) => (
+              <option key={c} value={c} />
+            ))}
+          </datalist>
+        </div>
 
-        <label htmlFor="difficulty-filter">רמת קושי</label>
-        <select
-          id="difficulty-filter"
-          value={difficulty}
-          onChange={(e) => setParam("difficulty", e.target.value)}
+        <div>
+          <label htmlFor="difficulty-filter">רמת קושי</label>
+          <select
+            id="difficulty-filter"
+            value={difficulty}
+            onChange={(e) => setParam("difficulty", e.target.value)}
+          >
+            <option value="">הכל</option>
+            {DIFFICULTIES.map((d) => (
+              <option key={d} value={d}>
+                {DIFFICULTY_LABELS[d]}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button
+          type="button"
+          className="btn-ghost"
+          onClick={() => setParams({}, { replace: true })}
         >
-          <option value="">הכל</option>
-          {DIFFICULTIES.map((d) => (
-            <option key={d} value={d}>
-              {DIFFICULTY_LABELS[d]}
-            </option>
-          ))}
-        </select>
-
-        <button type="button" onClick={() => setParams({}, { replace: true })}>
           איפוס סינון
         </button>
       </div>
 
-      <div>
+      <div className="room-grid">
         {data.items.length === 0 && <p>לא נמצאו חדרים התואמים לחיפוש.</p>}
         {data.items.map((room) => (
           <RoomCard key={room.id} room={room} />
