@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import type { MouseEvent, PointerEvent } from "react";
 
-type Position = { xPercent: number; yPercent: number };
+type Position = { xpercent: number; ypercent: number };
 
 type HotspotEditorProps = {
   imageUrl: string;
@@ -29,8 +29,8 @@ export default function HotspotEditor({
     const { left, top, width, height } = containerRef.current!.getBoundingClientRect();
     if (width === 0 || height === 0) return null;
     return {
-      xPercent: clamp(((event.clientX - left) / width) * 100),
-      yPercent: clamp(((event.clientY - top) / height) * 100),
+      xpercent: clamp(((event.clientX - left) / width) * 100),
+      ypercent: clamp(((event.clientY - top) / height) * 100),
     };
   }
 
@@ -68,7 +68,7 @@ export default function HotspotEditor({
           <span
             key={hotspot.id}
             className="hotspot-editor-marker"
-            style={{ left: `${hotspot.xPercent}%`, top: `${hotspot.yPercent}%` }}
+            style={{ left: `${hotspot.xpercent}%`, top: `${hotspot.ypercent}%` }}
             onPointerDown={(e) => e.currentTarget.setPointerCapture(e.pointerId)}
             onPointerMove={(e) => handleDrag(e, index)}
           >

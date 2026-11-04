@@ -1,20 +1,20 @@
 import { Link, useLocation } from "react-router-dom";
+import { errorMessage } from "../../api/client";
 import { ErrorMessage, Loading } from "../../components/common/Common";
 import { useDeleteRoom, useRooms } from "../../hooks/rooms";
 
 export default function AdminRooms() {
-  const { data: rooms, isPending, isError } = useRooms();
+  const { data, isPending, isError, error } = useRooms({ pageSize: 100 });
   const deleteMutation = useDeleteRoom();
   const successMessage = (useLocation().state as { successMessage?: string } | null)
     ?.successMessage;
 
   if (isPending) return <Loading />;
-  if (isError) return <ErrorMessage errorMessage="שגיאה בטעינת החדרים." />;
+  if (isError) return <ErrorMessage errorMessage={errorMessage(error, "שגיאה בטעינת החדרים.")} />;
 
   function handleDelete(id: string, title: string) {
-    if (window.confirm(`האם אתה בטוח שברצונך למחוק את החדר "${title}"?`)) {
-      deleteMutation.mutate(id);
-    }
+    const warning = `למחוק את החדר "${title}"? כל הנקודות וההתקדמות של השחקנים יימחקו, ואי אפשר לשחזר.`;
+    if (window.confirm(warning)) deleteMutation.mutate(id);
   }
 
   return (
@@ -24,15 +24,19 @@ export default function AdminRooms() {
       {(successMessage || deleteMutation.isSuccess) && (
         <p role="status">{deleteMutation.isSuccess ? "החדר נמחק בהצלחה." : successMessage}</p>
       )}
-      {deleteMutation.isError && <p role="alert">מחיקת החדר נכשלה. נסה שוב.</p>}
-      {rooms.length === 0 && <p>אין חדרים להצגה.</p>}
+      {deleteMutation.isError && (
+        <p role="alert">{errorMessage(deleteMutation.error, "מחיקת החדר נכשלה.")}</p>
+      )}
+      {data.items.length === 0 && <p>אין חדרים להצגה.</p>}
 
       <Link to="/admin/rooms/new">צור חדר חדש</Link>
 
       <ul>
-        {rooms.map((room) => (
+        {data.items.map((room) => (
           <li key={room.id}>
-            <span>{room.title}</span> <Link to={`/admin/rooms/${room.id}/edit`}>עריכה</Link>
+            <span>{room.title}</span>
+            {!room.isPlayable && <em> (לא ניתן לשחק: חסרה חידה סופית)</em>}{" "}
+            <Link to={`/admin/rooms/${room.id}/edit`}>עריכה</Link>
             <button
               type="button"
               onClick={() => handleDelete(room.id, room.title)}

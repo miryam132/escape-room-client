@@ -12,7 +12,9 @@ type Props = {
 export default function HotspotFields({ index, hotspots, register, errors }: Props) {
   const name = `hotspots.${index}` as const;
   const id = (suffix: string) => `hotspot-${suffix}-${index}`;
-  const isPuzzle = hotspots[index]?.type === "puzzle";
+  const current = hotspots[index];
+  const isPuzzle = current?.type === "PUZZLE";
+  const hasPrerequisite = Boolean(current?.prerequisiteId);
 
   return (
     <fieldset>
@@ -24,26 +26,17 @@ export default function HotspotFields({ index, hotspots, register, errors }: Pro
 
       <Field id={id("type")} label="סוג הנקודה">
         <select id={id("type")} {...register(`${name}.type`)}>
-          <option value="info">מידע</option>
-          <option value="puzzle">חידה</option>
+          <option value="INFO">מידע</option>
+          <option value="PUZZLE">חידה</option>
         </select>
       </Field>
 
-      <Field id={id("content")} label="תוכן" error={errors?.content?.message}>
+      <Field
+        id={id("content")}
+        label={isPuzzle ? "תיאור לפני הפתרון (לא חובה)" : "תוכן"}
+        error={errors?.content?.message}
+      >
         <textarea id={id("content")} rows={3} {...register(`${name}.content`)} />
-      </Field>
-
-      <Field id={id("requires")} label="נפתח אחרי פתרון" error={errors?.requiresHotspotId?.message}>
-        <select id={id("requires")} {...register(`${name}.requiresHotspotId`)}>
-          <option value="">זמין מיד</option>
-          {hotspots.map((item, i) =>
-            i !== index && item.type === "puzzle" ? (
-              <option key={item.id} value={item.id}>
-                {item.label || `נקודה ${i + 1}`}
-              </option>
-            ) : null,
-          )}
-        </select>
       </Field>
 
       {isPuzzle && (
@@ -52,14 +45,10 @@ export default function HotspotFields({ index, hotspots, register, errors }: Pro
             <textarea id={id("question")} rows={3} {...register(`${name}.question`)} />
           </Field>
 
-          <Field id={id("hint")} label="רמז" error={errors?.hint?.message}>
-            <input id={id("hint")} {...register(`${name}.hint`)} />
-          </Field>
-
           <Field id={id("answer-type")} label="סוג התשובה">
             <select id={id("answer-type")} {...register(`${name}.answerType`)}>
               <option value="text">טקסט</option>
-              <option value="number">מספר</option>
+              <option value="number">קוד מספרי (ספרות בלבד)</option>
             </select>
           </Field>
 
@@ -67,9 +56,48 @@ export default function HotspotFields({ index, hotspots, register, errors }: Pro
             <input id={id("answer")} {...register(`${name}.answer`)} />
           </Field>
 
+          <Field id={id("hint")} label="רמז (לא חובה)" error={errors?.hint?.message}>
+            <input id={id("hint")} {...register(`${name}.hint`)} />
+          </Field>
+
+          <Field
+            id={id("solved")}
+            label="תוכן שנחשף אחרי הפתרון"
+            error={errors?.solvedContent?.message}
+          >
+            <textarea id={id("solved")} rows={3} {...register(`${name}.solvedContent`)} />
+          </Field>
+
+          <Field
+            id={id("requires")}
+            label="נפתח אחרי פתרון"
+            error={errors?.prerequisiteId?.message}
+          >
+            <select id={id("requires")} {...register(`${name}.prerequisiteId`)}>
+              <option value="">זמין מיד</option>
+              {hotspots.map((item, i) =>
+                i !== index && item.type === "PUZZLE" && !item.isFinal ? (
+                  <option key={item.id} value={item.id}>
+                    {item.label || `נקודה ${i + 1}`}
+                  </option>
+                ) : null,
+              )}
+            </select>
+          </Field>
+
+          {hasPrerequisite && (
+            <Field
+              id={id("locked")}
+              label="הודעה כשהנקודה נעולה"
+              error={errors?.lockedMessage?.message}
+            >
+              <input id={id("locked")} {...register(`${name}.lockedMessage`)} />
+            </Field>
+          )}
+
           <label htmlFor={id("final")}>
             <input id={id("final")} type="checkbox" {...register(`${name}.isFinal`)} />
-            חידה סופית
+            חידה סופית (נפתחת אחרי שכל שאר החידות נפתרו)
           </label>
         </>
       )}

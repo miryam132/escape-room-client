@@ -1,29 +1,13 @@
-import type { Hotspot } from "../../types/hotspot";
+import type { HotspotSummary } from "../../types/hotspot";
 
 type RoomImageProps = {
   imageUrl: string;
   alt: string;
-  hotspots?: Hotspot[];
-  solvedHotspotIds?: string[];
-  lockedHotspotIds?: string[];
-  onHotspotClick?: (hotspot: Hotspot) => void;
+  hotspots?: HotspotSummary[];
+  onHotspotClick?: (hotspot: HotspotSummary) => void;
 };
 
-export function RoomImage({
-  imageUrl,
-  alt,
-  hotspots = [],
-  solvedHotspotIds = [],
-  lockedHotspotIds = [],
-  onHotspotClick,
-}: RoomImageProps) {
-  const statusClass = (id: string) =>
-    solvedHotspotIds.includes(id)
-      ? " hotspot-solved"
-      : lockedHotspotIds.includes(id)
-        ? " hotspot-locked"
-        : "";
-
+export function RoomImage({ imageUrl, alt, hotspots = [], onHotspotClick }: RoomImageProps) {
   return (
     <div className="room-image-container">
       <img src={imageUrl} alt={alt} className="room-image" />
@@ -32,10 +16,10 @@ export function RoomImage({
           key={h.id}
           type="button"
           onClick={() => onHotspotClick?.(h)}
-          className={`hotspot${statusClass(h.id)}`}
-          style={{ left: `${h.xPercent}%`, top: `${h.yPercent}%` }}
+          className={`hotspot hotspot-${h.state.toLowerCase()}`}
+          style={{ left: `${h.xpercent}%`, top: `${h.ypercent}%` }}
         >
-          {lockedHotspotIds.includes(h.id) && "🔒 "}
+          {h.state === "LOCKED" && "🔒 "}
           {h.label}
         </button>
       ))}

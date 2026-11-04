@@ -1,11 +1,10 @@
-import { describe, expect, it } from "vitest";
 import { registerSchema } from "./schemas";
 
 const valid = {
   name: "דנה",
   email: "dana@example.com",
-  password: "12345678",
-  confirmPassword: "12345678",
+  password: "1234567890",
+  confirmPassword: "1234567890",
 };
 
 describe("registerSchema", () => {
@@ -16,9 +15,9 @@ describe("registerSchema", () => {
   it.each([
     ["short name", { name: "ד" }],
     ["bad email", { email: "not-an-email" }],
-    ["short password", { password: "1234567", confirmPassword: "1234567" }],
-    ["password with spaces", { password: "1234 5678", confirmPassword: "1234 5678" }],
-    ["mismatched confirmation", { confirmPassword: "87654321" }],
+    ["short password", { password: "123456789", confirmPassword: "123456789" }],
+    ["too long password", { password: "x".repeat(73), confirmPassword: "x".repeat(73) }],
+    ["mismatched confirmation", { confirmPassword: "0987654321" }],
   ])("rejects %s", (_label, override) => {
     expect(registerSchema.safeParse({ ...valid, ...override }).success).toBe(false);
   });

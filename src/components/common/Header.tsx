@@ -11,7 +11,7 @@ export default function Header() {
           בית
         </NavLink>
         <NavLink to="/rooms">חדרים</NavLink>
-        {user?.role === "admin" && (
+        {user?.role === "ADMIN" && (
           <>
             <NavLink to="/admin/rooms">ניהול חדרים</NavLink>
             <NavLink to="/admin/users">ניהול משתמשים</NavLink>

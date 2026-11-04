@@ -1,15 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import { errorMessage } from "../../../api/client";
 import Field from "../../../components/common/Field";
 import {
-  CATEGORIES,
-  CATEGORY_LABELS,
   DIFFICULTIES,
   DIFFICULTY_LABELS,
   MAX_HOTSPOTS,
-  ROOM_IMAGES,
+  SUGGESTED_CATEGORIES,
 } from "../../../constants";
+import { useUploadImage } from "../../../hooks/rooms";
 import { EMPTY_HOTSPOT } from "../mappers";
 import type { RoomFormValues } from "../mappers";
 import { roomSchema } from "../roomSchema";
@@ -24,14 +24,16 @@ type RoomFormProps = {
 const EMPTY_ROOM: RoomFormValues = {
   title: "",
   description: "",
-  category: CATEGORIES[0],
+  category: "",
   difficulty: DIFFICULTIES[0],
-  imageUrl: ROOM_IMAGES[0].value,
+  imageUrl: "",
+  imageKey: "",
   hotspots: [],
 };
 
 export default function RoomForm({ initialValues, onSave }: RoomFormProps) {
   const [feedback, setFeedback] = useState("");
+  const upload = useUploadImage();
 
   const {
     register,
@@ -48,12 +50,24 @@ export default function RoomForm({ initialValues, onSave }: RoomFormProps) {
   const imageUrl = useWatch({ control, name: "imageUrl" });
   const hotspots = useWatch({ control, name: "hotspots" });
 
+  async function handleFile(file: File | undefined) {
+    if (!file) return;
+    setFeedback("");
+    try {
+      const { imageUrl, imageKey } = await upload.mutateAsync(file);
+      setValue("imageUrl", imageUrl, { shouldValidate: true });
+      setValue("imageKey", imageKey);
+    } catch (error) {
+      setFeedback(errorMessage(error, "העלאת התמונה נכשלה"));
+    }
+  }
+
   async function onSubmit(data: RoomFormValues) {
     setFeedback("");
     try {
       await onSave(data);
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : "שמירת החדר נכשלה");
+      setFeedback(errorMessage(error, "שמירת החדר נכשלה"));
     }
   }
 
@@ -68,14 +82,13 @@ export default function RoomForm({ initialValues, onSave }: RoomFormProps) {
           <textarea id="description" rows={4} {...register("description")} />
         </Field>
 
-        <Field id="category" label="קטגוריה">
-          <select id="category" {...register("category")}>
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {CATEGORY_LABELS[c]}
-              </option>
+        <Field id="category" label="קטגוריה" error={errors.category?.message}>
+          <input id="category" list="category-suggestions" {...register("category")} />
+          <datalist id="category-suggestions">
+            {SUGGESTED_CATEGORIES.map((c) => (
+              <option key={c} value={c} />
             ))}
-          </select>
+          </datalist>
         </Field>
 
         <Field id="difficulty" label="רמת קושי">
@@ -88,32 +101,38 @@ export default function RoomForm({ initialValues, onSave }: RoomFormProps) {
           </select>
         </Field>
 
-        <Field id="imageUrl" label="תמונת החדר">
-          <select id="imageUrl" {...register("imageUrl")}>
-            {ROOM_IMAGES.map(({ value, label }) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+        <Field
+          id="image"
+          label="תמונת החדר (JPEG / PNG / WebP, עד 5MB)"
+          error={errors.imageUrl?.message}
+        >
+          <input
+            id="image"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={(e) => handleFile(e.target.files?.[0])}
+          />
+          {upload.isPending && <p>מעלה תמונה...</p>}
         </Field>
 
-        <HotspotEditor
-          imageUrl={imageUrl}
-          hotspots={hotspots}
-          maxHotspots={MAX_HOTSPOTS}
-          onAdd={(position) =>
-            append(
-              { ...EMPTY_HOTSPOT, ...position, id: crypto.randomUUID() },
-              { shouldFocus: false },
-            )
-          }
-          onMove={(index, { xPercent, yPercent }) => {
-            setValue(`hotspots.${index}.xPercent`, xPercent);
-            setValue(`hotspots.${index}.yPercent`, yPercent);
-          }}
-          onRemoveLast={() => remove(fields.length - 1)}
-        />
+        {imageUrl && (
+          <HotspotEditor
+            imageUrl={imageUrl}
+            hotspots={hotspots}
+            maxHotspots={MAX_HOTSPOTS}
+            onAdd={(position) =>
+              append(
+                { ...EMPTY_HOTSPOT, ...position, id: crypto.randomUUID() },
+                { shouldFocus: false },
+              )
+            }
+            onMove={(index, { xpercent, ypercent }) => {
+              setValue(`hotspots.${index}.xpercent`, xpercent);
+              setValue(`hotspots.${index}.ypercent`, ypercent);
+            }}
+            onRemoveLast={() => remove(fields.length - 1)}
+          />
+        )}
 
         {(errors.hotspots?.root ?? errors.hotspots) && (
           <p role="alert">{errors.hotspots?.root?.message ?? errors.hotspots?.message}</p>

@@ -3,8 +3,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Field from "../../components/common/Field";
 import { Loading } from "../../components/common/Common";
-import { useUserResults } from "../../hooks/results";
-import { formatTime } from "../../lib/score";
+import { errorMessage } from "../../api/client";
+import { useMyGames } from "../../hooks/game";
+import { formatTime } from "../../lib/format";
 import { useAuth } from "./authContext";
 import { changePasswordSchema, profileSchema } from "./schemas";
 import type { ChangePasswordValues, ProfileValues } from "./schemas";
@@ -25,8 +26,12 @@ function ProfileForm() {
     <form
       noValidate
       onSubmit={handleSubmit(async ({ name }) => {
-        await updateName(name);
-        setMessage("השם עודכן בהצלחה");
+        try {
+          await updateName(name);
+          setMessage("השם עודכן בהצלחה");
+        } catch (error) {
+          setMessage(errorMessage(error, "העדכון נכשל"));
+        }
       })}
     >
       <h2>פרטים אישיים</h2>
@@ -61,7 +66,7 @@ function PasswordForm() {
       reset();
       setFeedback({ text: "הסיסמה עודכנה בהצלחה", isError: false });
     } catch (error) {
-      setFeedback({ text: error instanceof Error ? error.message : "העדכון נכשל", isError: true });
+      setFeedback({ text: errorMessage(error, "העדכון נכשל"), isError: true });
     }
   }
 
@@ -104,31 +109,29 @@ function PasswordForm() {
 }
 
 function History() {
-  const { user } = useAuth();
-  const { data: results, isPending } = useUserResults(user!.id);
+  const { data, isPending, isError } = useMyGames();
 
   if (isPending) return <Loading />;
+  if (isError) return <p role="alert">לא ניתן לטעון את היסטוריית המשחקים.</p>;
 
   return (
     <section>
       <h2>היסטוריית משחקים</h2>
-      {results?.length ? (
+      {data.items.length ? (
         <table>
           <thead>
             <tr>
               <th>חדר</th>
-              <th>ניקוד</th>
               <th>זמן</th>
               <th>תאריך</th>
             </tr>
           </thead>
           <tbody>
-            {results.map((r) => (
-              <tr key={r.id}>
-                <td>{r.roomTitle}</td>
-                <td>{r.score}</td>
-                <td>{formatTime(r.seconds)}</td>
-                <td>{new Date(r.finishedAt).toLocaleDateString("he-IL")}</td>
+            {data.items.map((game) => (
+              <tr key={`${game.roomId}-${game.completedAt}`}>
+                <td>{game.roomTitle}</td>
+                <td>{formatTime(game.seconds)}</td>
+                <td>{new Date(game.completedAt).toLocaleDateString("he-IL")}</td>
               </tr>
             ))}
           </tbody>

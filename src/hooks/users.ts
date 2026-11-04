@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { deleteUser, getUsers } from "../data/authRepository";
+import { deleteUser, getUsers } from "../api/users";
 
 export const useUsers = () => useQuery({ queryKey: ["users"], queryFn: getUsers });
 

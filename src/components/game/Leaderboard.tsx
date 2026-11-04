@@ -1,31 +1,29 @@
-import { useLeaderboard } from "../../hooks/results";
-import { formatTime } from "../../lib/score";
+import { useLeaderboard } from "../../hooks/game";
+import { formatTime } from "../../lib/format";
 
 export function Leaderboard({ roomId }: { roomId: string }) {
-  const { data: results, isPending } = useLeaderboard(roomId);
+  const { data, isPending, isError } = useLeaderboard(roomId);
 
-  if (isPending) return null;
+  if (isPending || isError) return null;
 
   return (
     <section>
-      <h2>לוח תוצאות</h2>
-      {results?.length ? (
+      <h2>לוח תוצאות – הזמנים המהירים ביותר</h2>
+      {data.items.length ? (
         <table>
           <thead>
             <tr>
               <th>#</th>
               <th>שחקן</th>
-              <th>ניקוד</th>
               <th>זמן</th>
             </tr>
           </thead>
           <tbody>
-            {results.map((r, i) => (
-              <tr key={r.id}>
+            {data.items.map((entry, i) => (
+              <tr key={`${entry.userName}-${entry.completedAt}`}>
                 <td>{i + 1}</td>
-                <td>{r.userName}</td>
-                <td>{r.score}</td>
-                <td>{formatTime(r.seconds)}</td>
+                <td>{entry.userName}</td>
+                <td>{formatTime(entry.seconds)}</td>
               </tr>
             ))}
           </tbody>

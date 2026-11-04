@@ -1,11 +1,12 @@
 import { TextInput } from "../common/Common";
-import type { Hotspot } from "../../types/hotspot";
+import type { PublicHotspot } from "../../types/hotspot";
 
 type HotspotPanelProps = {
-  hotspot: Hotspot;
+  hotspot: PublicHotspot;
   userAnswer: string;
-  answerFeedback: string;
-  isHintVisible: boolean;
+  feedback: string;
+  hint?: string;
+  isBusy: boolean;
   onAnswerChange: (value: string) => void;
   onCheckAnswer: () => void;
   onShowHint: () => void;
@@ -15,40 +16,58 @@ type HotspotPanelProps = {
 export function HotspotPanel({
   hotspot,
   userAnswer,
-  answerFeedback,
-  isHintVisible,
+  feedback,
+  hint,
+  isBusy,
   onAnswerChange,
   onCheckAnswer,
   onShowHint,
   onClose,
 }: HotspotPanelProps) {
+  const isOpen = hotspot.state === "AVAILABLE" && hotspot.type === "PUZZLE";
+
   return (
     <section>
       <h2>{hotspot.label}</h2>
-      <p>{hotspot.content}</p>
 
-      {hotspot.type === "puzzle" && (
-        <>
-          <p>{hotspot.question}</p>
+      {hotspot.state === "LOCKED" ? (
+        <p>🔒 {hotspot.lockedMessage}</p>
+      ) : (
+        <p style={{ whiteSpace: "pre-line" }}>{hotspot.content}</p>
+      )}
+
+      {isOpen && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onCheckAnswer();
+          }}
+        >
+          <p style={{ whiteSpace: "pre-line" }}>{hotspot.question}</p>
 
           <TextInput
             id={`answer-${hotspot.id}`}
-            label="התשובה שלך"
+            label={hotspot.answerType === "number" ? "הקוד שלך (ספרות)" : "התשובה שלך"}
             value={userAnswer}
             onChange={onAnswerChange}
           />
 
-          <button type="button" onClick={onShowHint} disabled={isHintVisible}>
-            הצג רמז (מוריד נקודות)
-          </button>
-          {isHintVisible && <p>{hotspot.hint}</p>}
+          {hotspot.hasHint && (
+            <>
+              <button type="button" onClick={onShowHint} disabled={isBusy || Boolean(hint)}>
+                הצג רמז
+              </button>
+              {hint && <p>{hint}</p>}
+            </>
+          )}
 
-          <button type="button" onClick={onCheckAnswer}>
+          <button type="submit" disabled={isBusy || !userAnswer.trim()}>
             בדוק תשובה
           </button>
-          <p>{answerFeedback}</p>
-        </>
+        </form>
       )}
+
+      {feedback && <p role="status">{feedback}</p>}
 
       <button type="button" onClick={onClose}>
         סגור

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import Field from "../../components/common/Field";
+import { errorMessage } from "../../api/client";
 import { useAuth } from "./authContext";
 import { registerSchema } from "./schemas";
 import type { RegisterValues } from "./schemas";
@@ -27,7 +28,7 @@ export default function RegisterPage() {
       await registerUser({ name, email, password });
       navigate("/rooms", { replace: true });
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : "ההרשמה נכשלה");
+      setFeedback(errorMessage(error, "ההרשמה נכשלה"));
     }
   }
 
@@ -64,7 +65,7 @@ export default function RegisterPage() {
 
             <Field
               id="register-password"
-              label="סיסמה (לפחות 8 תווים)"
+              label="סיסמה (לפחות 10 תווים)"
               error={errors.password?.message}
             >
               <input

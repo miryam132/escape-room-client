@@ -1,49 +1,61 @@
 import { z } from "zod";
-import { CATEGORIES, DIFFICULTIES, MIN_HOTSPOTS } from "../../constants";
+import { DIFFICULTIES, MIN_HOTSPOTS } from "../../constants";
 import { hasCycle } from "../../lib/hotspots";
 
-const filled = (message: string) => z.string().trim().min(1, message);
+const filled = (message: string, max = 10_000) =>
+  z.string().trim().min(1, message).max(max, "הטקסט ארוך מדי");
 
 const hotspotSchema = z
   .object({
     id: z.string(),
-    type: z.enum(["info", "puzzle"]),
-    label: filled("הזן שם פריט"),
-    xPercent: z.number(),
-    yPercent: z.number(),
-    content: filled("הזן תוכן"),
-    requiresHotspotId: z.string(),
+    type: z.enum(["INFO", "PUZZLE"]),
+    label: filled("הזן שם פריט", 150),
+    xpercent: z.number(),
+    ypercent: z.number(),
+    content: z.string().max(10_000),
     question: z.string(),
     answerType: z.enum(["text", "number"]),
     answer: z.string(),
     hint: z.string(),
+    solvedContent: z.string(),
+    prerequisiteId: z.string(),
+    lockedMessage: z.string(),
     isFinal: z.boolean(),
   })
   .superRefine((h, ctx) => {
-    if (h.type !== "puzzle") return;
+    const missing = (path: keyof typeof h, message: string) =>
+      ctx.addIssue({ code: "custom", path: [path], message });
 
-    const messages = { question: "הזן שאלה", hint: "הזן רמז", answer: "הזן את התשובה הנכונה" };
-    for (const field of ["question", "hint", "answer"] as const) {
-      if (!h[field].trim())
-        ctx.addIssue({ code: "custom", path: [field], message: messages[field] });
+    if (h.type === "INFO") {
+      if (!h.content.trim()) missing("content", "הזן תוכן");
+      return;
     }
-    if (h.answer.trim() && h.answerType === "number" && !Number.isFinite(Number(h.answer))) {
-      ctx.addIssue({ code: "custom", path: ["answer"], message: "הזן מספר תקין" });
+
+    if (!h.question.trim()) missing("question", "הזן שאלה");
+    if (!h.answer.trim()) missing("answer", "הזן את התשובה הנכונה");
+    else if (h.answerType === "number" && !/^\d+$/.test(h.answer.trim())) {
+      missing("answer", "תשובה מספרית היא קוד של ספרות בלבד (0-9)");
     }
+    if (!h.solvedContent.trim()) missing("solvedContent", "הזן את התוכן שנחשף אחרי הפתרון");
+    if (h.prerequisiteId && !h.lockedMessage.trim())
+      missing("lockedMessage", "הזן הודעה לנקודה נעולה");
   });
 
 export const roomSchema = z
   .object({
-    title: filled("הזן שם לחדר"),
-    description: filled("הזן תיאור"),
-    category: z.enum(CATEGORIES),
+    title: filled("הזן שם לחדר", 150),
+    description: filled("הזן תיאור", 5000),
+    category: filled("הזן קטגוריה", 80),
     difficulty: z.enum(DIFFICULTIES),
-    imageUrl: z.string().min(1),
+    imageUrl: z.string().min(1, "יש להעלות תמונה"),
+    imageKey: z.string(),
     hotspots: z.array(hotspotSchema),
   })
   .superRefine(({ hotspots }, ctx) => {
-    const finals = hotspots.filter((h) => h.type === "puzzle" && h.isFinal).length;
-    if (hotspots.length < MIN_HOTSPOTS || finals !== 1) {
+    const puzzles = hotspots.filter((h) => h.type === "PUZZLE");
+    const finals = puzzles.filter((h) => h.isFinal);
+
+    if (hotspots.length < MIN_HOTSPOTS || finals.length !== 1) {
       ctx.addIssue({
         code: "custom",
         path: ["hotspots"],
@@ -55,16 +67,26 @@ export const roomSchema = z
     }
 
     hotspots.forEach((h, index) => {
-      if (!h.requiresHotspotId) return;
-      const prerequisite = hotspots.find((other) => other.id === h.requiresHotspotId);
-      const message =
-        !prerequisite || prerequisite.type !== "puzzle"
-          ? "יש לבחור חידה קיימת"
-          : hasCycle(hotspots, h.id, h.requiresHotspotId)
+      if (h.type !== "PUZZLE" || !h.prerequisiteId) return;
+
+      const prerequisite = puzzles.find((other) => other.id === h.prerequisiteId);
+      const message = !prerequisite
+        ? "יש לבחור חידה קיימת"
+        : prerequisite.isFinal
+          ? "אי אפשר להתנות בחידה הסופית"
+          : hasCycle(
+                puzzles.map(({ id, prerequisiteId }) => ({
+                  id,
+                  requiresHotspotId: prerequisiteId,
+                })),
+                h.id,
+                h.prerequisiteId,
+              )
             ? "תלויות בין נקודות לא יכולות ליצור מעגל"
             : null;
+
       if (message) {
-        ctx.addIssue({ code: "custom", path: ["hotspots", index, "requiresHotspotId"], message });
+        ctx.addIssue({ code: "custom", path: ["hotspots", index, "prerequisiteId"], message });
       }
     });
   });

@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 // Simple regexes.
-const NAME = /^.{2,40}$/;
+const NAME = /^.{2,100}$/;
 const EMAIL = /^\S+@\S+\.\S+$/;
-const PASSWORD = /^\S{8,}$/;
+const PASSWORD = /^.{10,72}$/;
 
-const name = z.string().trim().regex(NAME, "השם חייב להכיל 2 עד 40 תווים");
+const name = z.string().trim().regex(NAME, "השם חייב להכיל 2 עד 100 תווים");
 const email = z.string().trim().regex(EMAIL, "הזן כתובת אימייל תקינה");
-const password = z.string().regex(PASSWORD, "הסיסמה חייבת להכיל לפחות 8 תווים, ללא רווחים");
+const password = z.string().regex(PASSWORD, "הסיסמה חייבת להכיל בין 10 ל־72 תווים");
 
 export const loginSchema = z.object({
   email: z.string().trim().min(1, "הזן כתובת אימייל"),

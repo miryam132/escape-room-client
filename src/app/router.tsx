@@ -23,18 +23,19 @@ export function AppRoutes() {
     <Suspense fallback={<Loading />}>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/rooms" element={<RoomsPage />} />
-        <Route path="/rooms/:id" element={<RoomDetailsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
+        {/* The server requires a login for everything except the auth endpoints. */}
         <Route element={<RequireRole />}>
+          <Route path="/rooms" element={<RoomsPage />} />
+          <Route path="/rooms/:id" element={<RoomDetailsPage />} />
           <Route path="/play/:id" element={<PlayPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
 
-        <Route element={<RequireRole role="admin" />}>
+        <Route element={<RequireRole role="ADMIN" />}>
           <Route path="/admin" element={<Navigate to="/admin/rooms" replace />} />
           <Route path="/admin/rooms" element={<AdminRooms />} />
           <Route path="/admin/rooms/new" element={<NewRoom />} />

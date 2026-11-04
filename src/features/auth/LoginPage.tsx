@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import Field from "../../components/common/Field";
+import { errorMessage } from "../../api/client";
 import { useAuth } from "./authContext";
 import { loginSchema } from "./schemas";
 import type { LoginValues } from "./schemas";
@@ -30,7 +31,7 @@ export default function LoginPage() {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : "ההתחברות נכשלה");
+      setFeedback(errorMessage(error, "ההתחברות נכשלה"));
     }
   }
 

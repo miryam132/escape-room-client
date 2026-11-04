@@ -1,74 +1,130 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { errorMessage } from "../../api/client";
 import { ErrorMessage, Loading } from "../../components/common/Common";
 import { RoomImage } from "../../components/common/RoomImage";
 import { HotspotPanel } from "../../components/game/HotspotPanel";
-import { ResultSummary } from "../../components/game/ResultSummary";
-import { useAuth } from "../auth/authContext";
-import { useRoom, useRoomHotspots } from "../../hooks/rooms";
-import { useSaveResult } from "../../hooks/results";
-import { useGame } from "../../hooks/useGame";
-import { calcScore, formatTime } from "../../lib/score";
-import type { GameStats } from "../../lib/score";
-import type { EscapeRoom } from "../../types/escapeRoom";
-import type { Hotspot } from "../../types/hotspot";
-import { useState } from "react";
+import { Leaderboard } from "../../components/game/Leaderboard";
+import {
+  useGame,
+  useHint,
+  useOpenHotspot,
+  useRestartGame,
+  useSubmitAnswer,
+} from "../../hooks/game";
+import { useRoom } from "../../hooks/rooms";
+import { useElapsed } from "../../hooks/useElapsed";
+import { formatTime } from "../../lib/format";
+import type { RoomSummary } from "../../types/escapeRoom";
+import type { Game } from "../../types/game";
 
-function Game({ room, hotspots }: { room: EscapeRoom; hotspots: Hotspot[] }) {
-  const { user } = useAuth();
-  const saveResult = useSaveResult();
-  const [stats, setStats] = useState<GameStats | null>(null);
+function Board({ room, game }: { room: RoomSummary; game: Game }) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [answer, setAnswer] = useState("");
+  const [feedback, setFeedback] = useState("");
+  const [hints, setHints] = useState<Record<string, string>>({});
+  const [wrongAnswers, setWrongAnswers] = useState(0);
 
-  const game = useGame(hotspots, (finalStats) => {
-    setStats(finalStats);
-    saveResult.mutate({
-      ...finalStats,
-      score: calcScore(finalStats),
-      roomId: room.id,
-      roomTitle: room.title,
-      userId: user!.id,
-      userName: user!.name,
+  const isCompleted = game.status === "COMPLETED";
+  const finalId = game.hotspots.find((h) => h.isFinal)?.id ?? null;
+  const seconds = useElapsed(game.startedAt, game.completedAt);
+
+  const hotspot = useOpenHotspot(room.id, isCompleted ? finalId : selectedId);
+  const submit = useSubmitAnswer(room.id);
+  const hint = useHint(room.id);
+  const restart = useRestartGame(room.id);
+
+  function open(id: string) {
+    setSelectedId(id);
+    setAnswer("");
+    setFeedback("");
+  }
+
+  function checkAnswer() {
+    if (!selectedId) return;
+    submit.mutate(
+      { hotspotId: selectedId, answer, revision: game.revision },
+      {
+        onSuccess: (result) => {
+          if (result.correct) {
+            setAnswer("");
+            setFeedback("תשובה נכונה!");
+          } else {
+            setWrongAnswers((n) => n + 1);
+            setFeedback("התשובה אינה נכונה, נסה שוב.");
+          }
+        },
+        onError: (error) => setFeedback(errorMessage(error)),
+      },
+    );
+  }
+
+  function showHint() {
+    if (!selectedId) return;
+    const id = selectedId;
+    hint.mutate(id, {
+      onSuccess: ({ hint: text }) =>
+        setHints((prev) => ({ ...prev, [id]: text ?? "אין רמז לחידה הזו." })),
+      onError: (error) => setFeedback(errorMessage(error)),
     });
-  });
+  }
 
   return (
     <div>
       <h1>{room.title}</h1>
       <p>
-        ⏱ {formatTime(game.seconds)} · רמזים: {game.hintsUsed} · טעויות: {game.wrongAnswers}
+        ⏱ {formatTime(seconds)} · נפתרו {game.solvedCount} מתוך {game.totalPuzzles} חידות
+        {!isCompleted && ` · רמזים: ${Object.keys(hints).length} · טעויות: ${wrongAnswers}`}
       </p>
 
       <RoomImage
         imageUrl={room.imageUrl}
         alt={room.title}
-        hotspots={hotspots}
-        solvedHotspotIds={game.solvedIds}
-        lockedHotspotIds={game.lockedIds}
-        onHotspotClick={game.select}
+        hotspots={game.hotspots}
+        onHotspotClick={(h) => !isCompleted && open(h.id)}
       />
 
-      {game.isCompleted && stats ? (
-        <ResultSummary
-          roomId={room.id}
-          stats={stats}
-          onReplay={() => {
-            setStats(null);
-            game.reset();
-          }}
-        />
-      ) : game.selected ? (
-        <HotspotPanel
-          hotspot={game.selected}
-          userAnswer={game.answer}
-          answerFeedback={game.feedback}
-          isHintVisible={game.isHintVisible}
-          onAnswerChange={game.setAnswer}
-          onCheckAnswer={game.check}
-          onShowHint={game.showHint}
-          onClose={game.close}
-        />
-      ) : (
-        <p role="status">{game.feedback}</p>
-      )}
+      {isCompleted ? (
+        <section role="status">
+          <h2>כל הכבוד! השלמת את החדר</h2>
+          {hotspot.data?.content && (
+            <p style={{ whiteSpace: "pre-line" }}>{hotspot.data.content}</p>
+          )}
+          <ul>
+            <li>זמן: {formatTime(seconds)}</li>
+            <li>רמזים שנעשה בהם שימוש: {Object.keys(hints).length}</li>
+            <li>תשובות שגויות: {wrongAnswers}</li>
+          </ul>
+          <button
+            type="button"
+            disabled={restart.isPending}
+            onClick={() => window.confirm("להתחיל את החדר מחדש?") && restart.mutate(game.revision)}
+          >
+            שחק שוב
+          </button>{" "}
+          <Link to="/rooms">חזרה לחדרים</Link>
+          {restart.isError && <p role="alert">{errorMessage(restart.error)}</p>}
+          <Leaderboard roomId={room.id} />
+        </section>
+      ) : selectedId ? (
+        hotspot.isPending ? (
+          <Loading />
+        ) : hotspot.isError ? (
+          <ErrorMessage errorMessage={errorMessage(hotspot.error)} />
+        ) : (
+          <HotspotPanel
+            hotspot={hotspot.data}
+            userAnswer={answer}
+            feedback={feedback}
+            hint={hints[selectedId]}
+            isBusy={submit.isPending || hint.isPending}
+            onAnswerChange={setAnswer}
+            onCheckAnswer={checkAnswer}
+            onShowHint={showHint}
+            onClose={() => setSelectedId(null)}
+          />
+        )
+      ) : null}
     </div>
   );
 }
@@ -76,18 +132,25 @@ function Game({ room, hotspots }: { room: EscapeRoom; hotspots: Hotspot[] }) {
 export default function PlayPage() {
   const { id } = useParams();
   const room = useRoom(id);
-  const hotspots = useRoomHotspots(id);
+  const game = useGame(room.data?.isPlayable ? id : undefined);
 
-  if (room.isPending || hotspots.isPending) return <Loading />;
-  if (room.isError || hotspots.isError) return <ErrorMessage errorMessage="שגיאה בטעינת החדר." />;
-  if (!room.data) {
+  if (room.isPending) return <Loading />;
+  if (room.isError)
+    return <ErrorMessage errorMessage={errorMessage(room.error, "שגיאה בטעינת החדר.")} />;
+
+  if (!room.data.isPlayable) {
     return (
       <>
-        <p>החדר לא נמצא</p>
+        <p>החדר עדיין לא מוכן למשחק.</p>
         <Link to="/rooms">חזרה לחדרים</Link>
       </>
     );
   }
 
-  return <Game key={room.data.id} room={room.data} hotspots={hotspots.data} />;
+  if (game.isPending) return <Loading />;
+  if (game.isError)
+    return <ErrorMessage errorMessage={errorMessage(game.error, "לא ניתן להתחיל את המשחק.")} />;
+
+  // Restarting gives a new startedAt, which also resets the local counters via the key.
+  return <Board key={game.data.startedAt} room={room.data} game={game.data} />;
 }

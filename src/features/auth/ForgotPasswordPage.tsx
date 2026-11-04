@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import Field from "../../components/common/Field";
-import { requestPasswordReset } from "../../data/authRepository";
+import { requestPasswordReset } from "../../api/auth";
 import { forgotPasswordSchema } from "./schemas";
 import type { ForgotPasswordValues } from "./schemas";
 
