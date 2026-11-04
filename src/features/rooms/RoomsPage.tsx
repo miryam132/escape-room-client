@@ -1,7 +1,6 @@
 import { useSearchParams } from "react-router-dom";
 import { errorMessage } from "../../api/client";
 import { ErrorMessage, Loading, TextInput } from "../../components/common/Common";
-import Secret from "../../components/fx/Secret";
 import { RoomCard } from "../../components/common/RoomCard";
 import { DIFFICULTIES, DIFFICULTY_LABELS, SUGGESTED_CATEGORIES } from "../../constants";
 import { useRooms } from "../../hooks/rooms";
@@ -44,9 +43,7 @@ export default function RoomsPage() {
   return (
     <>
       <h1>חדרי בריחה</h1>
-      <p className="lead">
-        בחרו חדר והתחילו לשחק. <Secret>הדלת הנכונה תמיד פתוחה קצת.</Secret>
-      </p>
+      <p>בחרו חדר והתחילו לשחק.</p>
 
       <div className="filters">
         <TextInput
@@ -57,39 +54,35 @@ export default function RoomsPage() {
           placeholder="הקלד שם או תיאור..."
         />
 
-        <div>
-          <label htmlFor="category-filter">קטגוריה</label>
-          <input
-            id="category-filter"
-            list="category-options"
-            value={category}
-            onChange={(e) => setParam("category", e.target.value)}
-          />
-        </div>
+        <label htmlFor="category-filter">קטגוריה</label>
+        <input
+          id="category-filter"
+          list="category-options"
+          value={category}
+          onChange={(e) => setParam("category", e.target.value)}
+        />
         <datalist id="category-options">
           {SUGGESTED_CATEGORIES.map((c) => (
             <option key={c} value={c} />
           ))}
         </datalist>
 
-        <div className="chips" role="group" aria-label="רמת קושי">
-          {[["", "הכל"], ...DIFFICULTIES.map((d) => [d, DIFFICULTY_LABELS[d]])].map(
-            ([value, text]) => (
-              <button
-                key={value}
-                type="button"
-                className="chip"
-                aria-pressed={difficulty === value}
-                onClick={() => setParam("difficulty", value)}
-              >
-                {text}
-              </button>
-            ),
-          )}
-        </div>
+        <label htmlFor="difficulty-filter">רמת קושי</label>
+        <select
+          id="difficulty-filter"
+          value={difficulty}
+          onChange={(e) => setParam("difficulty", e.target.value)}
+        >
+          <option value="">הכל</option>
+          {DIFFICULTIES.map((d) => (
+            <option key={d} value={d}>
+              {DIFFICULTY_LABELS[d]}
+            </option>
+          ))}
+        </select>
 
         <button type="button" onClick={() => setParams({}, { replace: true })}>
-          איפוס
+          איפוס סינון
         </button>
       </div>
 
