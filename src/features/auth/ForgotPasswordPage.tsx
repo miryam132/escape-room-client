@@ -9,6 +9,7 @@ import type { ForgotPasswordValues } from "./schemas";
 
 export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   const {
     register,
@@ -31,8 +32,14 @@ export default function ForgotPasswordPage() {
             className="auth-form"
             noValidate
             onSubmit={handleSubmit(async ({ email }) => {
-              await requestPasswordReset(email);
-              setSent(true);
+              setFailed(false);
+              try {
+                await requestPasswordReset(email);
+                setSent(true);
+              } catch {
+                // The server cannot send e-mail yet (see docs/SERVER-ENDPOINTS.md).
+                setFailed(true);
+              }
             })}
           >
             <Field id="forgot-email" label="אימייל" error={errors.email?.message}>
@@ -44,6 +51,7 @@ export default function ForgotPasswordPage() {
                 {...register("email")}
               />
             </Field>
+            {failed && <p role="alert">שחזור סיסמה אינו זמין כרגע. פנה למנהל המערכת.</p>}
             <button type="submit" disabled={isSubmitting}>
               שלח קישור לאיפוס
             </button>

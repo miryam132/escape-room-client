@@ -106,6 +106,8 @@ const MESSAGES: Record<string, string> = {
   GAME_NOT_STARTED: "המשחק עדיין לא התחיל.",
   HAS_DEPENDENTS: "חידות אחרות תלויות בנקודה הזו. הסר קודם את התלויות.",
   CYCLIC_DEPENDENCY: "תלויות בין נקודות לא יכולות ליצור מעגל.",
+  WRONG_PASSWORD: "הסיסמה הנוכחית שגויה.",
+  CANNOT_DELETE_ADMIN: "אי אפשר למחוק את המנהל.",
   CONFLICT: "הפריט כבר קיים (למשל תמונה שכבר משמשת חדר אחר).",
   RATE_LIMITED: "יותר מדי בקשות. נסה שוב מאוחר יותר.",
 };
