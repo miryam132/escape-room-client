@@ -23,32 +23,20 @@ export default function RoomDetailsPage() {
   }
 
   return (
-    <div className="room-details">
-      <div className="room-details-media">
-        <RoomImage imageUrl={room.imageUrl} alt={room.title} />
-      </div>
-
-      <div className="room-details-info">
-        <Link to="/rooms" className="back-link">
-          → כל החדרים
-        </Link>
-        <h1>{room.title}</h1>
-        <div>
-          <Badge text={DIFFICULTY_LABELS[room.difficulty]} />
-          <Badge text={room.category} />
-        </div>
-        <p>{room.description}</p>
-
+    <>
+      <h1>{room.title}</h1>
+      <RoomImage imageUrl={room.imageUrl} alt={room.title} />
+      <p>{room.description}</p>
+      <Badge text={DIFFICULTY_LABELS[room.difficulty]} />
+      <Badge text={room.category} />
+      <p>
         {room.isPlayable ? (
-          <Link to={`/play/${room.id}`} className="btn btn-primary btn-lg" data-magnetic>
-            <span>התחל לשחק</span>
-          </Link>
+          <Link to={`/play/${room.id}`}>התחל לשחק</Link>
         ) : (
           <em>החדר עדיין לא מוכן למשחק.</em>
         )}
-
-        <Leaderboard roomId={room.id} />
-      </div>
-    </div>
+      </p>
+      <Leaderboard roomId={room.id} />
+    </>
   );
 }

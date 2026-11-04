@@ -7,8 +7,8 @@ export function Leaderboard({ roomId }: { roomId: string }) {
   if (isPending || isError) return null;
 
   return (
-    <section className="leaderboard">
-      <h2>הזמנים המהירים ביותר</h2>
+    <section>
+      <h2>לוח תוצאות – הזמנים המהירים ביותר</h2>
       {data.items.length ? (
         <table>
           <thead>
@@ -19,7 +19,7 @@ export function Leaderboard({ roomId }: { roomId: string }) {
             </tr>
           </thead>
           <tbody>
-            {data.items.slice(0, 5).map((entry, i) => (
+            {data.items.map((entry, i) => (
               <tr key={`${entry.userName}-${entry.completedAt}`}>
                 <td>{i + 1}</td>
                 <td>{entry.userName}</td>
