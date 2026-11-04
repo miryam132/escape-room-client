@@ -1,16 +1,14 @@
 import { useEffect, useRef } from "react";
 
-const TRAIL = 7;
-
 /**
- * Mouse "aura": a soft light that follows the pointer with a comet trail, grows over
- * interactive elements and bursts on click. It also feeds pointer positions to
- * `[data-spot]` (spotlight), `[data-tilt]` (3D tilt) and `[data-magnetic]` elements
+ * Pointer layer: a small ring + dot that follow the mouse, grow over interactive elements and
+ * burst on click. It also feeds pointer positions to `[data-spot]` (spotlight), `[data-tilt]`
+ * (3D tilt), `[data-magnetic]` and `[data-secret]` (hidden text revealed by the veil) elements
  * through CSS variables, so components only need to add a data attribute.
  */
 export default function CursorGlow() {
-  const auraRef = useRef<HTMLDivElement>(null);
-  const trailRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const ringRef = useRef<HTMLDivElement>(null);
+  const dotRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fine = window.matchMedia("(pointer: fine)").matches;
@@ -18,12 +16,12 @@ export default function CursorGlow() {
     if (!fine) return;
 
     const root = document.documentElement;
-    const aura = auraRef.current;
-    let tx = window.innerWidth / 2;
-    let ty = window.innerHeight / 2;
+    const ring = ringRef.current;
+    const dot = dotRef.current;
+    let tx = -9999; // off-screen until the first pointer move, so nothing is revealed early
+    let ty = -9999;
     let ax = tx;
     let ay = ty;
-    const trail = Array.from({ length: TRAIL }, () => ({ x: tx, y: ty }));
     let raf = 0;
     let magnet: HTMLElement | null = null;
     let shown = false;
@@ -40,6 +38,8 @@ export default function CursorGlow() {
       ty = e.clientY;
       if (!shown) {
         shown = true;
+        ax = tx;
+        ay = ty;
         root.classList.add("has-aura");
       }
       const target = e.target instanceof Element ? e.target : null;
@@ -96,31 +96,26 @@ export default function CursorGlow() {
     const onDown = (e: PointerEvent) => {
       root.classList.add("aura-down");
       if (calm) return;
-      const ring = document.createElement("span");
-      ring.className = "click-ring";
-      ring.style.left = `${e.clientX}px`;
-      ring.style.top = `${e.clientY}px`;
-      document.body.appendChild(ring);
-      ring.addEventListener("animationend", () => ring.remove(), { once: true });
+      const burst = document.createElement("span");
+      burst.className = "click-ring";
+      burst.style.left = `${e.clientX}px`;
+      burst.style.top = `${e.clientY}px`;
+      document.body.appendChild(burst);
+      burst.addEventListener("animationend", () => burst.remove(), { once: true });
     };
     const onUp = () => root.classList.remove("aura-down");
 
     const tick = () => {
-      ax += (tx - ax) * 0.16;
-      ay += (ty - ay) * 0.16;
-      if (aura) aura.style.transform = `translate3d(${ax}px, ${ay}px, 0)`;
-      root.style.setProperty("--mx", `${ax}px`);
-      root.style.setProperty("--my", `${ay}px`);
+      ax += (tx - ax) * 0.18;
+      ay += (ty - ay) * 0.18;
+      if (ring) ring.style.transform = `translate3d(${ax}px, ${ay}px, 0)`;
+      if (dot) dot.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
 
-      let px = ax;
-      let py = ay;
-      trail.forEach((p, i) => {
-        p.x += (px - p.x) * 0.34;
-        p.y += (py - p.y) * 0.34;
-        px = p.x;
-        py = p.y;
-        const el = trailRefs.current[i];
-        if (el) el.style.transform = `translate3d(${p.x}px, ${p.y}px, 0)`;
+      // hidden text: tell each secret where the veil is, relative to itself
+      document.querySelectorAll<HTMLElement>("[data-secret]").forEach((el) => {
+        const r = el.getBoundingClientRect();
+        el.style.setProperty("--sx", `${ax - r.left}px`);
+        el.style.setProperty("--sy", `${ay - r.top}px`);
       });
       raf = requestAnimationFrame(tick);
     };
@@ -142,17 +137,8 @@ export default function CursorGlow() {
 
   return (
     <div className="aura-layer" aria-hidden="true">
-      <div ref={auraRef} className="aura" />
-      {Array.from({ length: TRAIL }, (_, i) => (
-        <span
-          key={i}
-          ref={(el) => {
-            trailRefs.current[i] = el;
-          }}
-          className="aura-trail"
-          style={{ ["--i" as string]: i }}
-        />
-      ))}
+      <div ref={ringRef} className="aura-ring" />
+      <div ref={dotRef} className="aura-dot" />
     </div>
   );
 }

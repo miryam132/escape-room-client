@@ -11,8 +11,10 @@ export function RoomCard({ room }: { room: RoomSummary }) {
       </div>
       <h3>{room.title}</h3>
       <p>{room.description}</p>
-      <Badge text={DIFFICULTY_LABELS[room.difficulty]} />
-      <Badge text={room.category} />
+      <div className="room-card-tags">
+        <Badge text={DIFFICULTY_LABELS[room.difficulty]} />
+        <Badge text={room.category} />
+      </div>
       <Link to={`/rooms/${room.id}`} className="btn btn-ghost">
         <span>לפרטים</span>
       </Link>
