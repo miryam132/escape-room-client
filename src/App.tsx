@@ -1,13 +1,13 @@
 import { AppRoutes } from "./app/router";
 import ErrorBoundary from "./components/common/ErrorBoundary";
 import CursorGlow from "./components/fx/CursorGlow";
-import ParticleField from "./components/fx/ParticleField";
+import SmokeAura from "./components/fx/SmokeAura";
 import Header from "./components/common/Header";
 
 export default function App() {
   return (
     <div className="container">
-      <ParticleField />
+      <SmokeAura />
       <CursorGlow />
       <Header />
       <main>
