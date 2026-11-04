@@ -29,6 +29,9 @@ beforeEach(() => {
     calls.push(`update ${id} ${Object.keys(changes).sort().join(",")}`);
     return {} as never;
   });
+  vi.mocked(api.deleteRoom).mockImplementation(async (id) => {
+    calls.push(`deleteRoom ${id}`);
+  });
   vi.mocked(api.deleteHotspot).mockImplementation(async (id) => {
     calls.push(`delete ${id}`);
   });
@@ -79,6 +82,33 @@ describe("saveRoom", () => {
     expect(vi.mocked(api.updateHotspot).mock.calls[0][1]).toMatchObject({
       prerequisiteId: "server-3",
     });
+  });
+
+  it("removes a newly created room again when saving its points fails", async () => {
+    vi.mocked(api.addHotspot).mockRejectedValueOnce(new Error("boom"));
+
+    await expect(saveRoom(null, form([puzzle("a", { isFinal: true })]))).rejects.toThrow("boom");
+    expect(calls).toEqual(["createRoom", "deleteRoom room"]);
+  });
+
+  it("does not delete an existing room when an update fails", async () => {
+    vi.mocked(api.updateRoom).mockRejectedValueOnce(new Error("boom"));
+    const original = {
+      id: "room",
+      title: "ישן",
+      description: "תיאור",
+      category: "חקירה",
+      difficulty: "easy",
+      imageUrl: "https://example.com/a.webp",
+      imageKey: "k",
+      revision: 1,
+      createdAt: "",
+      updatedAt: "",
+      hotspots: [],
+    } as AdminRoom;
+
+    await expect(saveRoom(original, form([]))).rejects.toThrow("boom");
+    expect(calls).toEqual([]);
   });
 
   it("sends nothing when nothing changed", async () => {

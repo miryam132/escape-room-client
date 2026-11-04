@@ -106,6 +106,7 @@ const MESSAGES: Record<string, string> = {
   GAME_NOT_STARTED: "המשחק עדיין לא התחיל.",
   HAS_DEPENDENTS: "חידות אחרות תלויות בנקודה הזו. הסר קודם את התלויות.",
   CYCLIC_DEPENDENCY: "תלויות בין נקודות לא יכולות ליצור מעגל.",
+  CONFLICT: "הפריט כבר קיים (למשל תמונה שכבר משמשת חדר אחר).",
   RATE_LIMITED: "יותר מדי בקשות. נסה שוב מאוחר יותר.",
 };
 
@@ -117,5 +118,6 @@ export function errorMessage(error: unknown, fallback = "אירעה שגיאה. 
   if (error.status === 413) return "התמונה גדולה מדי (עד 5MB).";
   if (error.status === 429) return MESSAGES.RATE_LIMITED;
   if (error.status >= 500) return "תקלה בשרת. נסה שוב מאוחר יותר.";
-  return MESSAGES[error.code] ?? fallback;
+  // Unknown codes: keep the Hebrew fallback but show the server code to make problems easy to report.
+  return MESSAGES[error.code] ?? `${fallback} (${error.code})`;
 }

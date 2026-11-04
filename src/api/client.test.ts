@@ -46,7 +46,9 @@ describe("request", () => {
 describe("errorMessage", () => {
   it("maps known codes to Hebrew and falls back otherwise", () => {
     expect(errorMessage(new ApiError(409, "PUZZLE_LOCKED", "x"))).toContain("נעולה");
-    expect(errorMessage(new ApiError(400, "SOMETHING_NEW", "x"), "ברירת מחדל")).toBe("ברירת מחדל");
+    expect(errorMessage(new ApiError(400, "SOMETHING_NEW", "x"), "ברירת מחדל")).toBe(
+      "ברירת מחדל (SOMETHING_NEW)",
+    );
     expect(errorMessage(new Error("boom"), "ברירת מחדל")).toBe("ברירת מחדל");
   });
 });
