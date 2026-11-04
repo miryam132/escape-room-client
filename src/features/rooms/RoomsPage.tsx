@@ -45,7 +45,7 @@ export default function RoomsPage() {
       <h1>חדרי בריחה</h1>
       <p>בחרו חדר והתחילו לשחק.</p>
 
-      <div className="filters">
+      <div>
         <TextInput
           id="room-search"
           label="חיפוש חדר"
@@ -86,7 +86,7 @@ export default function RoomsPage() {
         </button>
       </div>
 
-      <div className="room-grid">
+      <div>
         {data.items.length === 0 && <p>לא נמצאו חדרים התואמים לחיפוש.</p>}
         {data.items.map((room) => (
           <RoomCard key={room.id} room={room} />
@@ -94,7 +94,7 @@ export default function RoomsPage() {
       </div>
 
       {totalPages > 1 && (
-        <nav className="pager">
+        <nav>
           <button
             type="button"
             disabled={page <= 1}
