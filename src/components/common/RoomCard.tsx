@@ -4,6 +4,7 @@ import { DIFFICULTY_LABELS } from "../../constants";
 import type { RoomSummary } from "../../types/escapeRoom";
 import { Badge } from "./Common";
 import { Icon } from "./Icon";
+import { RevealLayer } from "./RevealLayer";
 
 /** Moves the card's light spot to the pointer (see .room-card::after in the stylesheet). */
 function trackPointer(event: PointerEvent<HTMLElement>) {
@@ -21,6 +22,7 @@ export function RoomCard({ room, index = 0 }: { room: RoomSummary; index?: numbe
     >
       <div className="room-card-media">
         <img src={room.imageUrl} alt={room.title} loading="lazy" />
+        <RevealLayer imageUrl={room.imageUrl} variant="color" radius={84} eventsFrom=".room-card" />
         <Badge text={DIFFICULTY_LABELS[room.difficulty]} tone={room.difficulty} />
       </div>
       <div className="room-card-body">

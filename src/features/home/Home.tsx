@@ -1,13 +1,13 @@
-import type { CSSProperties } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { DecryptText } from "../../components/common/DecryptText";
 import { Icon } from "../../components/common/Icon";
 import type { IconName } from "../../components/common/Icon";
 import { Reveal } from "../../components/common/Reveal";
+import { RevealLayer } from "../../components/common/RevealLayer";
 import { useAuth } from "../auth/authContext";
 
-const CODE = [7, 3, 1];
-const STRIP = [...Array(20).keys()].map((n) => n % 10);
+const SCENE_IMAGE = "/images/detective-office.png";
 
 const STEPS: { icon: IconName; title: string; text: string }[] = [
   {
@@ -33,36 +33,48 @@ const PERKS: { icon: IconName; text: string }[] = [
   { icon: "trophy", text: "לוח תוצאות לכל חדר" },
 ];
 
-/** Decorative combination lock: three reels spin and settle, then the LED turns green. */
-function Vault() {
+/** A dark room. The light shows what is hidden in it: a note and a code only the UV can see. */
+function HeroScene() {
+  const [showAll, setShowAll] = useState(false);
+  const [explored, setExplored] = useState(false);
+
   return (
-    <div className="vault" aria-hidden="true">
-      <div className="vault-dial" />
-      <div className="vault-panel">
-        <div className="vault-status">
-          <span className="led" />
-          <span className="vault-status-text">
-            <span className="vault-locked">נעול</span>
-            <span className="vault-open">נפתח</span>
-          </span>
-        </div>
-        <div className="reels" dir="ltr">
-          {CODE.map((digit, i) => (
-            <div className="reel" key={i}>
-              <div
-                className="reel-strip"
-                style={{ "--stop": digit, "--d": `${i * 380}ms` } as CSSProperties}
-              >
-                {STRIP.map((n, j) => (
-                  <span key={j}>{n}</span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-        <p className="vault-caption">הקוד נמצא איפשהו בחדר</p>
+    <figure className="hero-scene frame" aria-label="חדר חשוך עם קוד נסתר">
+      <div className="room-image-container has-uv">
+        <img src={SCENE_IMAGE} alt="" className="room-image" />
+        <RevealLayer
+          imageUrl={SCENE_IMAGE}
+          pinned={showAll}
+          radius={120}
+          onFirstMove={() => setExplored(true)}
+        >
+          <g transform="rotate(-4 52 36)">
+            <text x="52%" y="38%" className="uv-code">
+              7 · 3 · 1
+            </text>
+          </g>
+          <text x="46%" y="56%" className="uv-note">
+            הדלת נפתחת רק למי שמחפש
+          </text>
+        </RevealLayer>
+        <span className="room-image-vignette" aria-hidden="true" />
+        <button
+          type="button"
+          className="uv-toggle"
+          aria-pressed={showAll}
+          onClick={() => setShowAll((v) => !v)}
+        >
+          <Icon name="eye" size={16} />
+          {showAll ? "כיבוי תאורת UV" : "הדלקת תאורת UV"}
+        </button>
+        <p className={`uv-hint ${explored ? "is-gone" : ""}`} aria-hidden="true">
+          ( העבירו את הפנס על החדר )
+        </p>
       </div>
-    </div>
+      <figcaption className="sr-only">
+        בתמונה מוסתר, באור אולטרה-סגול, הקוד 7 3 1 והמשפט: הדלת נפתחת רק למי שמחפש.
+      </figcaption>
+    </figure>
   );
 }
 
@@ -107,7 +119,7 @@ export function Home() {
           </ul>
         </div>
 
-        <Vault />
+        <HeroScene />
       </section>
 
       <section className="home-section" aria-labelledby="how-heading">

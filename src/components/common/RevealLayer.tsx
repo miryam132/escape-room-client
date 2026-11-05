@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from "react";
+import type { ReactNode } from "react";
 
 export type RevealMark = { id: string; x: number; y: number };
 
@@ -11,9 +12,17 @@ type RevealLayerProps = {
   pinned?: boolean;
   /** Called once, the first time the light moves over the picture. */
   onFirstMove?: () => void;
+  /** "uv": violet blacklight look. "color": the same picture in its real, full colours. */
+  variant?: "uv" | "color";
+  /** Size of the light in px. */
+  radius?: number;
+  /** CSS selector of an ancestor whose pointer events drive the light (e.g. a whole card). */
+  eventsFrom?: string;
+  /** Extra SVG drawn inside the hidden layer (notes, codes), in % coordinates. */
+  children?: ReactNode;
 };
 
-const RADIUS = 104; // px, main blob
+const DEFAULT_RADIUS = 104; // px, main blob
 const SATELLITES = [
   { r: 0.6, orbit: 0.95, speed: 1.0, phase: 0.0 },
   { r: 0.5, orbit: 1.15, speed: -0.8, phase: 2.1 },
@@ -36,6 +45,10 @@ export function RevealLayer({
   marks = [],
   pinned = false,
   onFirstMove,
+  variant = "uv",
+  radius = DEFAULT_RADIUS,
+  eventsFrom,
+  children,
 }: RevealLayerProps) {
   const uid = useId().replace(/:/g, "");
   const svgRef = useRef<SVGSVGElement>(null);
@@ -55,6 +68,8 @@ export function RevealLayer({
     const svg = svgRef.current;
     const host = svg?.parentElement;
     if (!svg || !host) return;
+    const listener = (eventsFrom && svg.closest<HTMLElement>(eventsFrom)) || host;
+    const RADIUS = radius;
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const main = svg.querySelector<SVGCircleElement>("[data-blob='main']")!;
@@ -123,8 +138,9 @@ export function RevealLayer({
     const place = (event: PointerEvent) => {
       const rect = host.getBoundingClientRect();
       const first = !state.active;
-      state.x = event.clientX - rect.left;
-      state.y = event.clientY - rect.top;
+      // Clamped, so hovering any part of a card keeps the light at the nearest edge of the picture.
+      state.x = Math.min(rect.width, Math.max(0, event.clientX - rect.left));
+      state.y = Math.min(rect.height, Math.max(0, event.clientY - rect.top));
       if (first) {
         // Start the satellites on the pointer so the blob grows out of it.
         state.sats.forEach((s) => Object.assign(s, { x: state.x, y: state.y }));
@@ -152,24 +168,24 @@ export function RevealLayer({
       }
     };
 
-    host.addEventListener("pointerenter", place);
-    host.addEventListener("pointermove", place);
-    host.addEventListener("pointerleave", leave);
-    host.addEventListener("pointerup", leave);
-    host.addEventListener("pointercancel", leave);
+    listener.addEventListener("pointerenter", place);
+    listener.addEventListener("pointermove", place);
+    listener.addEventListener("pointerleave", leave);
+    listener.addEventListener("pointerup", leave);
+    listener.addEventListener("pointercancel", leave);
 
     return () => {
-      host.removeEventListener("pointerenter", place);
-      host.removeEventListener("pointermove", place);
-      host.removeEventListener("pointerleave", leave);
-      host.removeEventListener("pointerup", leave);
-      host.removeEventListener("pointercancel", leave);
+      listener.removeEventListener("pointerenter", place);
+      listener.removeEventListener("pointermove", place);
+      listener.removeEventListener("pointerleave", leave);
+      listener.removeEventListener("pointerup", leave);
+      listener.removeEventListener("pointercancel", leave);
       cancelAnimationFrame(state.frame);
       clearTimeout(state.hold);
       wake.current = () => {};
       host.querySelectorAll(".lit[data-hid]").forEach((el) => el.classList.remove("lit"));
     };
-  }, []);
+  }, [radius, eventsFrom]);
 
   const filterId = `goo-${uid}`;
   const maskId = `mask-${uid}`;
@@ -205,9 +221,9 @@ export function RevealLayer({
           width="100%"
           height="100%"
           preserveAspectRatio="xMidYMid slice"
-          className="uv-image"
+          className={variant === "uv" ? "uv-image" : "reveal-image"}
         />
-        <rect width="100%" height="100%" className="uv-tint" />
+        {variant === "uv" && <rect width="100%" height="100%" className="uv-tint" />}
         {marks.map((mark, i) => (
           <g key={mark.id} className="uv-mark">
             <circle cx={`${mark.x}%`} cy={`${mark.y}%`} r="34" />
@@ -224,6 +240,7 @@ export function RevealLayer({
             </text>
           </g>
         ))}
+        {children}
       </g>
     </svg>
   );
