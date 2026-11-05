@@ -1041,7 +1041,7 @@ function grainPoints(cv,n){const ctx=cv.getContext('2d'),d=ctx.getImageData(0,0,
    פתיחה: מנעול גרגירים נבנה, הגלגלות מסתובבות, המנעול נפתח,
    ואז הוא מתפרק לגרגירים שמתכנסים לשם האתר
    ========================================================= */
-const SITE_NAME="חדרי בריחה";   // ← להחליף בשם האתר האמיתי
+const SITE_NAME="מנעול";
 const CODE=[1,4,2,0];
 $('#reels').innerHTML=CODE.map(()=>`<div class="reel"><div class="strip">${Array.from({length:30},(_,i)=>`<span>${i%10}</span>`).join('')}</div></div>`).join('');
 $('#introName').dataset.text=SITE_NAME;$('#introName').textContent=SITE_NAME;
