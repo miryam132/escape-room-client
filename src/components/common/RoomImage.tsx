@@ -1,6 +1,8 @@
+import { useState } from "react";
 import type { CSSProperties } from "react";
 import type { HotspotSummary } from "../../types/hotspot";
 import { Icon } from "./Icon";
+import { RevealLayer } from "./RevealLayer";
 
 type RoomImageProps = {
   imageUrl: string;
@@ -16,14 +18,43 @@ function HotspotIcon({ hotspot }: { hotspot: HotspotSummary }) {
 }
 
 export function RoomImage({ imageUrl, alt, hotspots = [], onHotspotClick }: RoomImageProps) {
+  const [showAll, setShowAll] = useState(false);
+  const [explored, setExplored] = useState(false);
+  const interactive = hotspots.length > 0;
+
   return (
-    <div className="room-image-container">
+    <div className={`room-image-container ${interactive ? "has-uv" : ""}`}>
       <img src={imageUrl} alt={alt} className="room-image" />
-      {hotspots.length > 0 && <span className="room-image-vignette" aria-hidden="true" />}
+
+      {interactive && (
+        <>
+          <RevealLayer
+            imageUrl={imageUrl}
+            marks={hotspots.map((h) => ({ id: h.id, x: h.xpercent, y: h.ypercent }))}
+            pinned={showAll}
+            onFirstMove={() => setExplored(true)}
+          />
+          <span className="room-image-vignette" aria-hidden="true" />
+          <button
+            type="button"
+            className="uv-toggle"
+            aria-pressed={showAll}
+            onClick={() => setShowAll((v) => !v)}
+          >
+            <Icon name="eye" size={16} />
+            {showAll ? "כיבוי תאורת UV" : "הדלקת תאורת UV"}
+          </button>
+          <p className={`uv-hint ${explored ? "is-gone" : ""}`} aria-hidden="true">
+            ( העבירו את הפנס על החדר )
+          </p>
+        </>
+      )}
+
       {hotspots.map((h, i) => (
         <button
           key={h.id}
           type="button"
+          data-hid={h.id}
           onClick={() => onHotspotClick?.(h)}
           className={`hotspot hotspot-${h.state.toLowerCase()} hotspot-${h.type.toLowerCase()}`}
           style={{ left: `${h.xpercent}%`, top: `${h.ypercent}%`, "--i": i } as CSSProperties}
