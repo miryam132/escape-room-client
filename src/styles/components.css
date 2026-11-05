@@ -645,9 +645,6 @@
 .auth-lock-body {
   fill: var(--accent);
 }
-.auth-lock-hole {
-  fill: var(--accent-ink);
-}
 .auth-card:has(input:focus) .auth-lock-shackle {
   transform: translateY(-7px) rotate(-18deg);
 }
@@ -804,4 +801,31 @@
 .hotspot-editor-marker:active {
   cursor: grabbing;
   transform: translate(-50%, -50%) scale(1.15);
+}
+
+/* ---------- Eye (pupil follows the pointer) ---------- */
+
+.eye-sclera {
+  fill: #f4f1ff;
+  stroke: #0b1020;
+  stroke-width: 2;
+}
+.eye-iris {
+  fill: var(--signal);
+}
+.eye-pupil {
+  fill: #0b1020;
+}
+.eye-glint {
+  fill: #fff;
+}
+.eye-svg {
+  display: block;
+  height: auto;
+}
+.not-found-code .eye-svg {
+  display: inline-block;
+  width: 0.95em;
+  margin-inline: 0.04em;
+  vertical-align: -0.06em;
 }

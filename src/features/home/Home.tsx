@@ -6,26 +6,10 @@ import type { IconName } from "../../components/common/Icon";
 import { Reveal } from "../../components/common/Reveal";
 import { RevealLayer } from "../../components/common/RevealLayer";
 import { useAuth } from "../auth/authContext";
+import { DoorSection } from "./DoorSection";
+import { SECRET_CODE_SPACED } from "./secretCode";
 
 const SCENE_IMAGE = "/images/detective-office.png";
-
-const STEPS: { icon: IconName; title: string; text: string }[] = [
-  {
-    icon: "door",
-    title: "בוחרים חדר",
-    text: "חדרים בכל רמות הקושי – מחקירה ומסתורין ועד הרפתקאות.",
-  },
-  {
-    icon: "search",
-    title: "חוקרים את החדר",
-    text: "לוחצים על פריטים בתמונה, אוספים רמזים ופותחים נעילות.",
-  },
-  {
-    icon: "key",
-    title: "מפענחים את הקוד",
-    text: "פותרים את החידה הסופית, בורחים ונכנסים ללוח התוצאות.",
-  },
-];
 
 const PERKS: { icon: IconName; text: string }[] = [
   { icon: "target", text: "חידות על גבי תמונה אמיתית של החדר" },
@@ -50,7 +34,7 @@ function HeroScene() {
         >
           <g transform="rotate(-4 52 36)">
             <text x="52%" y="38%" className="uv-code">
-              7 · 3 · 1
+              {SECRET_CODE_SPACED}
             </text>
           </g>
           <text x="46%" y="56%" className="uv-note">
@@ -122,27 +106,7 @@ export function Home() {
         <HeroScene />
       </section>
 
-      <section className="home-section" aria-labelledby="how-heading">
-        <Reveal>
-          <p className="eyebrow">איך זה עובד</p>
-          <h2 id="how-heading">שלושה שלבים בין הכניסה ליציאה</h2>
-        </Reveal>
-
-        <ol className="steps">
-          {STEPS.map((step, i) => (
-            <li key={step.title}>
-              <Reveal delay={i * 120} className="step">
-                <span className="step-num">{i + 1}</span>
-                <span className="step-icon">
-                  <Icon name={step.icon} size={26} />
-                </span>
-                <h3>{step.title}</h3>
-                <p>{step.text}</p>
-              </Reveal>
-            </li>
-          ))}
-        </ol>
-      </section>
+      <DoorSection />
 
       <Reveal className="cta-band">
         <div>
