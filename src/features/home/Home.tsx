@@ -1,6 +1,6 @@
 import { useState } from "react";
+import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
-import { DecryptText } from "../../components/common/DecryptText";
 import { Icon } from "../../components/common/Icon";
 import type { IconName } from "../../components/common/Icon";
 import { Reveal } from "../../components/common/Reveal";
@@ -16,6 +16,31 @@ const PERKS: { icon: IconName; text: string }[] = [
   { icon: "bulb", text: "רמזים כשנתקעים" },
   { icon: "trophy", text: "לוח תוצאות לכל חדר" },
 ];
+
+/** Headline words that switch on one after another, like lights in a dark room (once). */
+function LightsOn({
+  text,
+  start = 0,
+  accent = false,
+}: {
+  text: string;
+  start?: number;
+  accent?: boolean;
+}) {
+  return (
+    <>
+      {text.split(" ").map((word, i) => (
+        <span
+          key={i}
+          className={`lights-word ${accent ? "hero-accent" : ""}`}
+          style={{ "--w": start + i } as CSSProperties}
+        >
+          {word}
+        </span>
+      ))}
+    </>
+  );
+}
 
 /** A dark room. The light shows what is hidden in it: a note and a code only the UV can see. */
 function HeroScene() {
@@ -73,11 +98,9 @@ export function Home() {
             <span className="pulse-dot" /> Mysteria · חדרי בריחה
           </p>
           <h1>
-            הדלת נעולה.
+            <LightsOn text="הדלת נעולה." />
             <br />
-            <span className="hero-accent">
-              <DecryptText text="הצליחו לברוח?" />
-            </span>
+            <LightsOn text="הצליחו לברוח?" start={2} accent />
           </h1>
           <p className="lead">פתרו חידות, מצאו רמזים והצליחו לברוח מהחדר לפני כולם.</p>
 
