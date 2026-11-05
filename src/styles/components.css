@@ -151,7 +151,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: flicker 5s steps(1) infinite;
+  animation: flicker 2.4s steps(1) 1 both;
 }
 @keyframes flicker {
   0%,
@@ -632,7 +632,6 @@
   margin: 0 auto 0.8rem;
   overflow: visible;
   filter: drop-shadow(0 8px 24px rgba(255, 107, 79, 0.45));
-  animation: float 5s ease-in-out infinite;
 }
 .auth-lock-shackle {
   fill: none;
@@ -651,11 +650,6 @@
 }
 .auth-card:has(input:focus) .auth-lock-shackle {
   transform: translateY(-7px) rotate(-18deg);
-}
-@keyframes float {
-  50% {
-    transform: translateY(-6px);
-  }
 }
 
 /* ---------- Profile ---------- */

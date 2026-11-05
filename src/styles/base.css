@@ -189,36 +189,45 @@ a:hover {
   inset-block-start: -18vmax;
   inset-inline-start: -10vmax;
   background: #ff4b6e;
-  animation: drift 26s ease-in-out infinite alternate;
 }
 .ambient-glow-b {
   inset-block-end: -22vmax;
   inset-inline-end: -12vmax;
   background: #2f7bff;
   opacity: 0.22;
-  animation: drift 32s ease-in-out infinite alternate-reverse;
 }
 
-.ambient-grid {
+.ambient-plan {
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 56px 56px;
-  opacity: 0.35;
-  mask-image: radial-gradient(ellipse 80% 70% at 50% 35%, #000 20%, transparent 75%);
+  overflow: hidden;
+  opacity: 0.1;
 }
-
-.ambient-beam {
+.plan-tile {
   position: absolute;
-  inset-inline: 0;
-  inset-block-start: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(255, 107, 79, 0.55), transparent);
-  box-shadow: 0 0 24px 4px rgba(255, 107, 79, 0.25);
-  opacity: 0.55;
-  animation: scan 14s linear infinite;
+  inset: -1000px 0 0 -1600px;
+  background-size: 1600px 1000px;
+  background-repeat: repeat;
+  transform: translate3d(var(--tx), var(--ty), 0);
+  will-change: transform;
+}
+/* The same plan, brighter, only where the cursor's light falls */
+.ambient-plan.is-lit {
+  opacity: 0;
+  transition: opacity 0.6s;
+  -webkit-mask-image: radial-gradient(
+    300px circle at var(--mx, 50vw) var(--my, 30vh),
+    #000,
+    transparent 75%
+  );
+  mask-image: radial-gradient(
+    300px circle at var(--mx, 50vw) var(--my, 30vh),
+    #000,
+    transparent 75%
+  );
+}
+.ambient.is-tracking .ambient-plan.is-lit {
+  opacity: 0.5;
 }
 
 .ambient-cursor {
@@ -234,20 +243,6 @@ a:hover {
 }
 .ambient.is-tracking .ambient-cursor {
   opacity: 1;
-}
-
-@keyframes drift {
-  to {
-    transform: translate3d(6vmax, 5vmax, 0) scale(1.1);
-  }
-}
-@keyframes scan {
-  from {
-    transform: translateY(-10vh);
-  }
-  to {
-    transform: translateY(110vh);
-  }
 }
 
 /* ---------- Layout ---------- */
@@ -697,8 +692,5 @@ p[role="alert"] {
   .reveal {
     opacity: 1;
     transform: none;
-  }
-  .ambient-beam {
-    display: none;
   }
 }
