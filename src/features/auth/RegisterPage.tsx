@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import Field from "../../components/common/Field";
+import { AuthLock } from "./AuthLock";
 import { errorMessage } from "../../api/client";
 import { useAuth } from "./authContext";
 import { registerSchema } from "./schemas";
@@ -33,10 +34,11 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="auth-page">
+    <div className="auth-page">
       <section className="auth-card" aria-labelledby="register-heading">
+        <AuthLock />
         <h1 id="register-heading">הרשמה ל־Mysteria</h1>
-        <p>מלא את הפרטים ליצירת חשבון.</p>
+        <p className="auth-sub">מלא את הפרטים ליצירת חשבון.</p>
 
         <form
           className="auth-form"
@@ -91,16 +93,18 @@ export default function RegisterPage() {
               />
             </Field>
 
-            <button type="submit">{isSubmitting ? "יוצר חשבון..." : "הרשמה"}</button>
+            <button type="submit" className="btn btn-primary btn-block">
+              {isSubmitting ? "יוצר חשבון..." : "הרשמה"}
+            </button>
           </fieldset>
 
           {feedback && <p role="alert">{feedback}</p>}
         </form>
 
-        <p>
+        <p className="auth-links">
           כבר יש לך חשבון? <Link to="/login">התחבר</Link>
         </p>
       </section>
-    </main>
+    </div>
   );
 }

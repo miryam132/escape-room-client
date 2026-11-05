@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ApiError, errorMessage } from "../../api/client";
-import { ErrorMessage, Loading } from "../../components/common/Common";
+import { ErrorMessage, Loading, PageTitle } from "../../components/common/Common";
 import { useAdminRoom, useSaveRoom } from "../../hooks/rooms";
 import RoomForm from "./components/RoomForm";
 import { toHotspotFormValues } from "./mappers";
@@ -16,9 +16,11 @@ export default function EditRoom() {
   if (room.isPending) return <Loading />;
   if (room.isError) {
     return room.error instanceof ApiError && room.error.status === 404 ? (
-      <div>
+      <div className="empty">
         <p>החדר לא נמצא.</p>
-        <Link to="/admin/rooms">חזרה לניהול חדרים</Link>
+        <Link to="/admin/rooms" className="btn btn-ghost">
+          חזרה לניהול חדרים
+        </Link>
       </div>
     ) : (
       <ErrorMessage errorMessage={errorMessage(room.error, "שגיאה בטעינת החדר")} />
@@ -47,7 +49,7 @@ export default function EditRoom() {
 
   return (
     <>
-      <h1>עריכת חדר: {title}</h1>
+      <PageTitle eyebrow="ניהול" title={`עריכת חדר: ${title}`} />
       <RoomForm key={room.data.revision} initialValues={initialValues} onSave={handleSave} />
     </>
   );

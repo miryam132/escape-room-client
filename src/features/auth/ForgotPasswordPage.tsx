@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import Field from "../../components/common/Field";
+import { AuthLock } from "./AuthLock";
 import { requestPasswordReset } from "../../api/auth";
 import { forgotPasswordSchema } from "./schemas";
 import type { ForgotPasswordValues } from "./schemas";
@@ -21,12 +22,15 @@ export default function ForgotPasswordPage() {
   });
 
   return (
-    <main className="auth-page">
+    <div className="auth-page">
       <section className="auth-card">
+        <AuthLock />
         <h1>שכחתי סיסמה</h1>
 
         {sent ? (
-          <p role="status">אם הכתובת רשומה במערכת, נשלח אליה קישור לאיפוס הסיסמה.</p>
+          <p role="status" className="feedback feedback-ok">
+            אם הכתובת רשומה במערכת, נשלח אליה קישור לאיפוס הסיסמה.
+          </p>
         ) : (
           <form
             className="auth-form"
@@ -52,14 +56,16 @@ export default function ForgotPasswordPage() {
               />
             </Field>
             {failed && <p role="alert">שחזור סיסמה אינו זמין כרגע. פנה למנהל המערכת.</p>}
-            <button type="submit" disabled={isSubmitting}>
+            <button type="submit" className="btn btn-primary btn-block" disabled={isSubmitting}>
               שלח קישור לאיפוס
             </button>
           </form>
         )}
 
-        <Link to="/login">חזרה להתחברות</Link>
+        <p className="auth-links">
+          <Link to="/login">חזרה להתחברות</Link>
+        </p>
       </section>
-    </main>
+    </div>
   );
 }

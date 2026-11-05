@@ -1,6 +1,7 @@
 import { useSearchParams } from "react-router-dom";
 import { errorMessage } from "../../api/client";
-import { ErrorMessage, Loading, TextInput } from "../../components/common/Common";
+import { ErrorMessage, Loading, PageTitle } from "../../components/common/Common";
+import { Icon } from "../../components/common/Icon";
 import { RoomCard } from "../../components/common/RoomCard";
 import { DIFFICULTIES, DIFFICULTY_LABELS, SUGGESTED_CATEGORIES } from "../../constants";
 import { useRooms } from "../../hooks/rooms";
@@ -39,72 +40,112 @@ export default function RoomsPage() {
   if (isError) return <ErrorMessage errorMessage={errorMessage(error, "שגיאה בטעינת החדרים.")} />;
 
   const totalPages = Math.max(1, Math.ceil(data.total / data.pageSize));
+  const hasFilters = Boolean(search || category || difficulty);
 
   return (
     <>
-      <h1>חדרי בריחה</h1>
-      <p>בחרו חדר והתחילו לשחק.</p>
+      <PageTitle eyebrow="הקטלוג" title="חדרי בריחה">
+        <p className="lead">בחרו חדר והתחילו לשחק.</p>
+      </PageTitle>
 
-      <div>
-        <TextInput
-          id="room-search"
-          label="חיפוש חדר"
-          value={search}
-          onChange={(value) => setParam("q", value)}
-          placeholder="הקלד שם או תיאור..."
-        />
+      <div className="filters">
+        <div className="form-field filter-search">
+          <label htmlFor="room-search">חיפוש חדר</label>
+          <div className="input-icon">
+            <Icon name="search" size={18} />
+            <input
+              id="room-search"
+              type="search"
+              value={search}
+              placeholder="הקלד שם או תיאור..."
+              onChange={(e) => setParam("q", e.target.value)}
+            />
+          </div>
+        </div>
 
-        <label htmlFor="category-filter">קטגוריה</label>
-        <input
-          id="category-filter"
-          list="category-options"
-          value={category}
-          onChange={(e) => setParam("category", e.target.value)}
-        />
-        <datalist id="category-options">
-          {SUGGESTED_CATEGORIES.map((c) => (
-            <option key={c} value={c} />
-          ))}
-        </datalist>
+        <div className="form-field">
+          <label htmlFor="category-filter">קטגוריה</label>
+          <input
+            id="category-filter"
+            list="category-options"
+            value={category}
+            placeholder="הכל"
+            onChange={(e) => setParam("category", e.target.value)}
+          />
+          <datalist id="category-options">
+            {SUGGESTED_CATEGORIES.map((c) => (
+              <option key={c} value={c} />
+            ))}
+          </datalist>
+        </div>
 
-        <label htmlFor="difficulty-filter">רמת קושי</label>
-        <select
-          id="difficulty-filter"
-          value={difficulty}
-          onChange={(e) => setParam("difficulty", e.target.value)}
-        >
-          <option value="">הכל</option>
-          {DIFFICULTIES.map((d) => (
-            <option key={d} value={d}>
-              {DIFFICULTY_LABELS[d]}
-            </option>
-          ))}
-        </select>
+        <div className="form-field">
+          <span className="field-label" id="difficulty-label">
+            רמת קושי
+          </span>
+          <div className="chips" role="group" aria-labelledby="difficulty-label">
+            <button
+              type="button"
+              className="chip"
+              aria-pressed={!difficulty}
+              onClick={() => setParam("difficulty", "")}
+            >
+              הכל
+            </button>
+            {DIFFICULTIES.map((d) => (
+              <button
+                key={d}
+                type="button"
+                className={`chip chip-${d}`}
+                aria-pressed={difficulty === d}
+                onClick={() => setParam("difficulty", d)}
+              >
+                {DIFFICULTY_LABELS[d]}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        <button type="button" onClick={() => setParams({}, { replace: true })}>
-          איפוס סינון
-        </button>
+        {hasFilters && (
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm filters-reset"
+            onClick={() => setParams({}, { replace: true })}
+          >
+            איפוס סינון
+          </button>
+        )}
       </div>
 
-      <div>
-        {data.items.length === 0 && <p>לא נמצאו חדרים התואמים לחיפוש.</p>}
-        {data.items.map((room) => (
-          <RoomCard key={room.id} room={room} />
+      {data.items.length === 0 && (
+        <div className="empty">
+          <Icon name="search" size={28} />
+          <p>לא נמצאו חדרים התואמים לחיפוש.</p>
+        </div>
+      )}
+
+      <div className="room-grid">
+        {data.items.map((room, i) => (
+          <RoomCard key={room.id} room={room} index={i} />
         ))}
       </div>
 
       {totalPages > 1 && (
-        <nav>
+        <nav className="pager" aria-label="עמודים">
           <button
             type="button"
+            className="btn btn-ghost btn-sm"
             disabled={page <= 1}
             onClick={() => setParam("page", String(page - 1))}
           >
             הקודם
-          </button>{" "}
-          עמוד {page} מתוך {totalPages}{" "}
+          </button>
+          <span>
+            עמוד {page} מתוך {totalPages}
+          </span>
           <button
             type="button"
+            className="btn btn-ghost btn-sm"
             disabled={page >= totalPages}
             onClick={() => setParam("page", String(page + 1))}
           >

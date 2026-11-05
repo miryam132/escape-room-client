@@ -18,9 +18,9 @@ export default class ErrorBoundary extends Component<{ children: ReactNode }, St
     if (!this.state.hasError) return this.props.children;
 
     return (
-      <div role="alert">
+      <div role="alert" className="not-found">
         <h1>משהו השתבש</h1>
-        <button type="button" onClick={() => location.reload()}>
+        <button type="button" className="btn btn-primary" onClick={() => location.reload()}>
           טען מחדש
         </button>
       </div>
