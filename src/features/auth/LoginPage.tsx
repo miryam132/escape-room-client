@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import Field from "../../components/common/Field";
+import { AuthLock } from "./AuthLock";
 import { errorMessage } from "../../api/client";
 import { useAuth } from "./authContext";
 import { loginSchema } from "./schemas";
@@ -36,9 +37,11 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="auth-page">
+    <div className="auth-page">
       <section className="auth-card" aria-labelledby="login-heading">
+        <AuthLock />
         <h1 id="login-heading">התחברות</h1>
+        <p className="auth-sub">טוב לראות אותך שוב. החדרים מחכים.</p>
 
         <form className="auth-form" onSubmit={handleSubmit(onSubmit)} noValidate>
           <fieldset
@@ -65,19 +68,21 @@ export default function LoginPage() {
               />
             </Field>
 
-            <button type="submit">{isSubmitting ? "מתחבר..." : "התחבר"}</button>
+            <button type="submit" className="btn btn-primary btn-block">
+              {isSubmitting ? "מתחבר..." : "התחבר"}
+            </button>
           </fieldset>
 
           {feedback && <p role="alert">{feedback}</p>}
         </form>
 
-        <p>
+        <p className="auth-links">
           <Link to="/forgot-password">שכחת סיסמה?</Link>
         </p>
-        <p>
+        <p className="auth-links">
           אין לך חשבון? <Link to="/register">הרשמה</Link>
         </p>
       </section>
-    </main>
+    </div>
   );
 }

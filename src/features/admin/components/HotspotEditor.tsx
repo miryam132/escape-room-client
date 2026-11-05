@@ -47,7 +47,7 @@ export default function HotspotEditor({
 
   return (
     <div className="hotspot-editor">
-      <p>
+      <p className="muted">
         {isFull
           ? `מוקמו כל ${maxHotspots} הנקודות.`
           : `לחץ על התמונה כדי למקם את נקודה ${hotspots.length + 1}. אפשר לגרור נקודה כדי להזיז אותה.`}
@@ -77,11 +77,16 @@ export default function HotspotEditor({
         ))}
       </div>
 
-      <p>
+      <p className="muted">
         נקודות: {hotspots.length} / {maxHotspots}
       </p>
 
-      <button type="button" disabled={hotspots.length === 0} onClick={onRemoveLast}>
+      <button
+        type="button"
+        className="btn btn-ghost btn-sm"
+        disabled={hotspots.length === 0}
+        onClick={onRemoveLast}
+      >
         הסר את הנקודה האחרונה
       </button>
     </div>

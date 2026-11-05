@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { PageTitle } from "../../components/common/Common";
 import { useSaveRoom } from "../../hooks/rooms";
 import RoomForm from "./components/RoomForm";
 import type { RoomFormValues } from "./mappers";
@@ -14,7 +15,7 @@ export default function NewRoom() {
 
   return (
     <>
-      <h1>יצירת חדר</h1>
+      <PageTitle eyebrow="ניהול" title="יצירת חדר" />
       <RoomForm onSave={handleSave} />
     </>
   );

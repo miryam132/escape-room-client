@@ -17,7 +17,7 @@ export default function HotspotFields({ index, hotspots, register, errors }: Pro
   const hasPrerequisite = Boolean(current?.prerequisiteId);
 
   return (
-    <fieldset>
+    <fieldset className="card hotspot-fields">
       <legend>נקודה {index + 1}</legend>
 
       <Field id={id("label")} label="שם הפריט" error={errors?.label?.message}>
@@ -95,7 +95,7 @@ export default function HotspotFields({ index, hotspots, register, errors }: Pro
             </Field>
           )}
 
-          <label htmlFor={id("final")}>
+          <label htmlFor={id("final")} className="check">
             <input id={id("final")} type="checkbox" {...register(`${name}.isFinal`)} />
             חידה סופית (נפתחת אחרי שכל שאר החידות נפתרו)
           </label>

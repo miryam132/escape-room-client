@@ -1,5 +1,6 @@
 import { errorMessage } from "../../api/client";
-import { ErrorMessage, Loading } from "../../components/common/Common";
+import { ErrorMessage, Loading, PageTitle } from "../../components/common/Common";
+import { Icon } from "../../components/common/Icon";
 import { useDeleteUser, useUsers } from "../../hooks/users";
 
 export default function AdminUsers() {
@@ -15,39 +16,56 @@ export default function AdminUsers() {
 
   return (
     <>
-      <h1>ניהול משתמשים</h1>
+      <PageTitle eyebrow="ניהול" title="ניהול משתמשים" />
       {deleteUser.isError && <p role="alert">{errorMessage(deleteUser.error, "המחיקה נכשלה.")}</p>}
 
-      <table>
-        <thead>
-          <tr>
-            <th>שם</th>
-            <th>אימייל</th>
-            <th>תפקיד</th>
-            <th />
-          </tr>
-        </thead>
-        <tbody>
-          {data.items.map((user) => (
-            <tr key={user.id}>
-              <td>{user.name}</td>
-              <td dir="ltr">{user.email}</td>
-              <td>{user.role === "ADMIN" ? "מנהל" : "משתמש"}</td>
-              <td>
-                {user.role !== "ADMIN" && (
-                  <button
-                    type="button"
-                    disabled={deleteUser.isPending}
-                    onClick={() => handleDelete(user.id, user.name)}
-                  >
-                    מחיקה
-                  </button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="card table-card">
+        <div className="table-wrap">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>שם</th>
+                <th>אימייל</th>
+                <th>תפקיד</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {data.items.map((user) => (
+                <tr key={user.id}>
+                  <td>
+                    <span className="user-cell">
+                      <span className="avatar" aria-hidden="true">
+                        {user.name.trim().charAt(0)}
+                      </span>
+                      {user.name}
+                    </span>
+                  </td>
+                  <td dir="ltr">{user.email}</td>
+                  <td>
+                    <span className={`role-pill ${user.role === "ADMIN" ? "role-admin" : ""}`}>
+                      {user.role === "ADMIN" ? "מנהל" : "משתמש"}
+                    </span>
+                  </td>
+                  <td>
+                    {user.role !== "ADMIN" && (
+                      <button
+                        type="button"
+                        className="btn btn-danger btn-sm"
+                        disabled={deleteUser.isPending}
+                        onClick={() => handleDelete(user.id, user.name)}
+                      >
+                        <Icon name="trash" size={16} />
+                        מחיקה
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </>
   );
 }

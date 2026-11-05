@@ -1,9 +1,12 @@
 import { useState } from "react";
+import type { CSSProperties } from "react";
 import { Link, useParams } from "react-router-dom";
 import { errorMessage } from "../../api/client";
 import { ErrorMessage, Loading } from "../../components/common/Common";
+import { Icon } from "../../components/common/Icon";
 import { RoomImage } from "../../components/common/RoomImage";
-import { HotspotPanel } from "../../components/game/HotspotPanel";
+import { HotspotPanel, PanelFrame } from "../../components/game/HotspotPanel";
+import type { PanelFeedback } from "../../components/game/HotspotPanel";
 import { Leaderboard } from "../../components/game/Leaderboard";
 import {
   useGame,
@@ -21,7 +24,8 @@ import type { Game } from "../../types/game";
 function Board({ room, game }: { room: RoomSummary; game: Game }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [answer, setAnswer] = useState("");
-  const [feedback, setFeedback] = useState("");
+  const [feedback, setFeedback] = useState<PanelFeedback | null>(null);
+  const say = (text: string, ok: boolean) => setFeedback({ text, ok, n: Date.now() });
   const [hints, setHints] = useState<Record<string, string>>({});
   const [wrongAnswers, setWrongAnswers] = useState(0);
 
@@ -37,7 +41,7 @@ function Board({ room, game }: { room: RoomSummary; game: Game }) {
   function open(id: string) {
     setSelectedId(id);
     setAnswer("");
-    setFeedback("");
+    setFeedback(null);
   }
 
   function checkAnswer() {
@@ -48,13 +52,13 @@ function Board({ room, game }: { room: RoomSummary; game: Game }) {
         onSuccess: (result) => {
           if (result.correct) {
             setAnswer("");
-            setFeedback("תשובה נכונה!");
+            say("תשובה נכונה!", true);
           } else {
             setWrongAnswers((n) => n + 1);
-            setFeedback("התשובה אינה נכונה, נסה שוב.");
+            say("התשובה אינה נכונה, נסה שוב.", false);
           }
         },
-        onError: (error) => setFeedback(errorMessage(error)),
+        onError: (error) => say(errorMessage(error), false),
       },
     );
   }
@@ -65,52 +69,121 @@ function Board({ room, game }: { room: RoomSummary; game: Game }) {
     hint.mutate(id, {
       onSuccess: ({ hint: text }) =>
         setHints((prev) => ({ ...prev, [id]: text ?? "אין רמז לחידה הזו." })),
-      onError: (error) => setFeedback(errorMessage(error)),
+      onError: (error) => say(errorMessage(error), false),
     });
   }
 
-  return (
-    <div>
-      <h1>{room.title}</h1>
-      <p>
-        ⏱ {formatTime(seconds)} · נפתרו {game.solvedCount} מתוך {game.totalPuzzles} חידות
-        {!isCompleted && ` · רמזים: ${Object.keys(hints).length} · טעויות: ${wrongAnswers}`}
-      </p>
+  const progress = game.totalPuzzles ? (game.solvedCount / game.totalPuzzles) * 100 : 0;
+  const closePanel = () => setSelectedId(null);
 
-      <RoomImage
-        imageUrl={room.imageUrl}
-        alt={room.title}
-        hotspots={game.hotspots}
-        onHotspotClick={(h) => !isCompleted && open(h.id)}
-      />
+  return (
+    <div className="play">
+      <div className="hud">
+        <div className="hud-top">
+          <div>
+            <Link to="/rooms" className="back-link">
+              <Icon name="arrow" size={16} />
+              יציאה לחדרים
+            </Link>
+            <h1>{room.title}</h1>
+          </div>
+          <div className="hud-timer" aria-label="זמן במשחק">
+            <Icon name="clock" size={20} />
+            <span className="mono">{formatTime(seconds)}</span>
+          </div>
+        </div>
+
+        <div className="hud-bottom">
+          <div
+            className="progress"
+            role="progressbar"
+            aria-label="התקדמות"
+            aria-valuemin={0}
+            aria-valuemax={game.totalPuzzles}
+            aria-valuenow={game.solvedCount}
+          >
+            <span style={{ width: `${progress}%` }} />
+          </div>
+          <p className="hud-stats">
+            <span>
+              נפתרו <b>{game.solvedCount}</b> מתוך <b>{game.totalPuzzles}</b> חידות
+            </span>
+            {!isCompleted && (
+              <>
+                <span>
+                  רמזים: <b>{Object.keys(hints).length}</b>
+                </span>
+                <span>
+                  טעויות: <b>{wrongAnswers}</b>
+                </span>
+              </>
+            )}
+          </p>
+        </div>
+      </div>
+
+      <div className="frame frame-play">
+        <RoomImage
+          imageUrl={room.imageUrl}
+          alt={room.title}
+          hotspots={game.hotspots}
+          onHotspotClick={(h) => !isCompleted && open(h.id)}
+        />
+      </div>
 
       {isCompleted ? (
-        <section role="status">
+        <section role="status" className="victory">
+          <div className="confetti" aria-hidden="true">
+            {Array.from({ length: 28 }, (_, i) => (
+              <span key={i} style={{ "--k": i } as CSSProperties} />
+            ))}
+          </div>
+          <span className="victory-icon">
+            <Icon name="door" size={34} />
+          </span>
           <h2>כל הכבוד! השלמת את החדר</h2>
-          {hotspot.data?.content && (
-            <p style={{ whiteSpace: "pre-line" }}>{hotspot.data.content}</p>
-          )}
-          <ul>
-            <li>זמן: {formatTime(seconds)}</li>
-            <li>רמזים שנעשה בהם שימוש: {Object.keys(hints).length}</li>
-            <li>תשובות שגויות: {wrongAnswers}</li>
+          {hotspot.data?.content && <p className="victory-text">{hotspot.data.content}</p>}
+          <ul className="victory-stats">
+            <li>
+              <span className="mono">{formatTime(seconds)}</span>
+              <small>זמן</small>
+            </li>
+            <li>
+              <span className="mono">{Object.keys(hints).length}</span>
+              <small>רמזים שנעשה בהם שימוש</small>
+            </li>
+            <li>
+              <span className="mono">{wrongAnswers}</span>
+              <small>תשובות שגויות</small>
+            </li>
           </ul>
-          <button
-            type="button"
-            disabled={restart.isPending}
-            onClick={() => window.confirm("להתחיל את החדר מחדש?") && restart.mutate(game.revision)}
-          >
-            שחק שוב
-          </button>{" "}
-          <Link to="/rooms">חזרה לחדרים</Link>
+          <div className="victory-actions">
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={restart.isPending}
+              onClick={() =>
+                window.confirm("להתחיל את החדר מחדש?") && restart.mutate(game.revision)
+              }
+            >
+              שחק שוב
+            </button>
+            <Link to="/rooms" className="btn btn-ghost">
+              חזרה לחדרים
+            </Link>
+          </div>
           {restart.isError && <p role="alert">{errorMessage(restart.error)}</p>}
           <Leaderboard roomId={room.id} />
         </section>
       ) : selectedId ? (
         hotspot.isPending ? (
-          <Loading />
+          <PanelFrame title="טוען" onClose={closePanel}>
+            <Loading />
+          </PanelFrame>
         ) : hotspot.isError ? (
-          <ErrorMessage errorMessage={errorMessage(hotspot.error)} />
+          <PanelFrame title="שגיאה" onClose={closePanel}>
+            <ErrorMessage errorMessage={errorMessage(hotspot.error)} />
+          </PanelFrame>
         ) : (
           <HotspotPanel
             hotspot={hotspot.data}
@@ -121,7 +194,7 @@ function Board({ room, game }: { room: RoomSummary; game: Game }) {
             onAnswerChange={setAnswer}
             onCheckAnswer={checkAnswer}
             onShowHint={showHint}
-            onClose={() => setSelectedId(null)}
+            onClose={closePanel}
           />
         )
       ) : null}
@@ -140,10 +213,12 @@ export default function PlayPage() {
 
   if (!room.data.isPlayable) {
     return (
-      <>
+      <div className="empty">
         <p>החדר עדיין לא מוכן למשחק.</p>
-        <Link to="/rooms">חזרה לחדרים</Link>
-      </>
+        <Link to="/rooms" className="btn btn-ghost">
+          חזרה לחדרים
+        </Link>
+      </div>
     );
   }
 
