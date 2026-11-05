@@ -100,7 +100,7 @@ export function Home() {
           <h1>
             <LightsOn text="הדלת נעולה." />
             <br />
-            <LightsOn text="הצליחו לברוח?" start={2} accent />
+            <LightsOn text="תצליחו לברוח?" start={2} accent />
           </h1>
           <p className="lead">פתרו חידות, מצאו רמזים והצליחו לברוח מהחדר לפני כולם.</p>
 
