@@ -1,4 +1,6 @@
-## link to web - https://escape-room-client.onrender.com/
+## link to web - https://escape-room-client.onrender.com
+#admin -  mail: admin@escape-room.com passward: securepassword
+
 # Mysteria – חדרי בריחה
 
 אפליקציית React לחדרי בריחה: שחקנים פותרים חידות על גבי תמונת החדר, והמנהל בונה חדרים ונקודות (hotspots).
