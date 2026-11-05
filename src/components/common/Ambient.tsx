@@ -1,12 +1,13 @@
 import { useEffect, useRef } from "react";
-import { PLAN_TILE_H, PLAN_TILE_URL, PLAN_TILE_W } from "./planTile";
+import { CLUE_TILE_H, CLUE_TILE_URL, CLUE_TILE_W } from "./clueTile";
 
 const mod = (value: number, size: number) => ((value % size) + size) % size;
 
 /**
- * Fixed background behind the whole app: a very faint architectural floor plan that is
- * lit up by the cursor (the same "light reveals" idea as the rooms). It only moves in
- * response to the user: slow parallax when scrolling and a tiny shift with the pointer.
+ * Fixed background behind the whole app: clues scribbled on the wall of a dark room (keyholes,
+ * keys, clocks, cipher scraps), almost invisible until the cursor's light falls on them (the same
+ * "light reveals" idea as the rooms). It only moves in response to the user: slow parallax when
+ * scrolling and a tiny shift with the pointer.
  */
 export default function Ambient() {
   const ref = useRef<HTMLDivElement>(null);
@@ -24,8 +25,8 @@ export default function Ambient() {
       frame = 0;
       const tx = reduce ? 0 : (0.5 - pointerX) * 26;
       const ty = reduce ? 0 : -window.scrollY * 0.18 + (0.5 - pointerY) * 18;
-      el.style.setProperty("--tx", `${mod(tx, PLAN_TILE_W)}px`);
-      el.style.setProperty("--ty", `${mod(ty, PLAN_TILE_H)}px`);
+      el.style.setProperty("--tx", `${mod(tx, CLUE_TILE_W)}px`);
+      el.style.setProperty("--ty", `${mod(ty, CLUE_TILE_H)}px`);
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(paint);
@@ -54,11 +55,11 @@ export default function Ambient() {
     <div ref={ref} className="ambient" aria-hidden="true">
       <span className="ambient-glow ambient-glow-a" />
       <span className="ambient-glow ambient-glow-b" />
-      <div className="ambient-plan">
-        <span className="plan-tile" style={{ backgroundImage: PLAN_TILE_URL }} />
+      <div className="ambient-clues">
+        <span className="clue-tile" style={{ backgroundImage: CLUE_TILE_URL }} />
       </div>
-      <div className="ambient-plan is-lit">
-        <span className="plan-tile" style={{ backgroundImage: PLAN_TILE_URL }} />
+      <div className="ambient-clues is-lit">
+        <span className="clue-tile" style={{ backgroundImage: CLUE_TILE_URL }} />
       </div>
       <span className="ambient-cursor" />
     </div>

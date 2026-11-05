@@ -30,6 +30,11 @@ function Board({ room, game }: { room: RoomSummary; game: Game }) {
   const [wrongAnswers, setWrongAnswers] = useState(0);
 
   const isCompleted = game.status === "COMPLETED";
+  // The "you escaped" pop-up appears the moment the last puzzle is solved (not when you
+  // come back to a room you already finished).
+  const [startedActive] = useState(game.status === "ACTIVE");
+  const [celebrationClosed, setCelebrationClosed] = useState(false);
+  const celebrate = isCompleted && startedActive && !celebrationClosed;
   const finalId = game.hotspots.find((h) => h.isFinal)?.id ?? null;
   const seconds = useElapsed(game.startedAt, game.completedAt);
 
@@ -198,6 +203,60 @@ function Board({ room, game }: { room: RoomSummary; game: Game }) {
           />
         )
       ) : null}
+
+      {celebrate && (
+        <PanelFrame
+          title="השלמת את החדר"
+          className="victory-dialog"
+          onClose={() => setCelebrationClosed(true)}
+        >
+          <div className="confetti" aria-hidden="true">
+            {Array.from({ length: 28 }, (_, i) => (
+              <span key={i} style={{ "--k": i } as CSSProperties} />
+            ))}
+          </div>
+          <span className="victory-icon">
+            <Icon name="door" size={34} />
+          </span>
+          <h2>כל הכבוד! השלמת את החדר</h2>
+          {hotspot.data?.content && <p className="victory-text">{hotspot.data.content}</p>}
+          <ul className="victory-stats">
+            <li>
+              <span className="mono">{formatTime(seconds)}</span>
+              <small>זמן</small>
+            </li>
+            <li>
+              <span className="mono">{Object.keys(hints).length}</span>
+              <small>רמזים</small>
+            </li>
+            <li>
+              <span className="mono">{wrongAnswers}</span>
+              <small>טעויות</small>
+            </li>
+          </ul>
+          <div className="victory-actions">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setCelebrationClosed(true)}
+            >
+              <Icon name="trophy" size={18} />
+              לוח התוצאות
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              disabled={restart.isPending}
+              onClick={() => restart.mutate(game.revision)}
+            >
+              שחק שוב
+            </button>
+            <Link to="/rooms" className="btn btn-ghost">
+              חזרה לחדרים
+            </Link>
+          </div>
+        </PanelFrame>
+      )}
     </div>
   );
 }

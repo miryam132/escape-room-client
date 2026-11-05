@@ -197,13 +197,13 @@ a:hover {
   opacity: 0.22;
 }
 
-.ambient-plan {
+.ambient-clues {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  opacity: 0.1;
+  opacity: 0.14;
 }
-.plan-tile {
+.clue-tile {
   position: absolute;
   inset: -1000px 0 0 -1600px;
   background-size: 1600px 1000px;
@@ -211,8 +211,8 @@ a:hover {
   transform: translate3d(var(--tx), var(--ty), 0);
   will-change: transform;
 }
-/* The same plan, brighter, only where the cursor's light falls */
-.ambient-plan.is-lit {
+/* The same clues, brighter, only where the cursor's light falls */
+.ambient-clues.is-lit {
   opacity: 0;
   transition: opacity 0.6s;
   -webkit-mask-image: radial-gradient(
@@ -226,7 +226,7 @@ a:hover {
     transparent 75%
   );
 }
-.ambient.is-tracking .ambient-plan.is-lit {
+.ambient.is-tracking .ambient-clues.is-lit {
   opacity: 0.5;
 }
 
@@ -254,7 +254,9 @@ a:hover {
 }
 
 .page {
-  animation: page-in 0.55s var(--ease) both;
+  /* "backwards", not "both": a leftover transform would make fixed pop-ups position
+     themselves against the page instead of the screen. */
+  animation: page-in 0.55s var(--ease) backwards;
 }
 @keyframes page-in {
   from {

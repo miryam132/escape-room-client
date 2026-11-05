@@ -11,6 +11,9 @@ type RoomImageProps = {
   onHotspotClick?: (hotspot: HotspotSummary) => void;
 };
 
+/** The light is small on purpose: items only show up where you shine it. */
+const GAME_LIGHT_RADIUS = 68;
+
 function HotspotIcon({ hotspot }: { hotspot: HotspotSummary }) {
   if (hotspot.state === "LOCKED") return <Icon name="lock" size={16} />;
   if (hotspot.state === "SOLVED") return <Icon name="check" size={18} />;
@@ -32,6 +35,7 @@ export function RoomImage({ imageUrl, alt, hotspots = [], onHotspotClick }: Room
             imageUrl={imageUrl}
             marks={hotspots.map((h) => ({ id: h.id, x: h.xpercent, y: h.ypercent }))}
             pinned={showAll}
+            radius={GAME_LIGHT_RADIUS}
             onFirstMove={() => setExplored(true)}
           />
           <span className="room-image-vignette" aria-hidden="true" />

@@ -6,10 +6,15 @@ import type { PublicHotspot } from "../../types/hotspot";
 
 export type PanelFeedback = { text: string; ok: boolean; n: number };
 
-type PanelFrameProps = { title: string; children: ReactNode; onClose: () => void };
+type PanelFrameProps = {
+  title: string;
+  children: ReactNode;
+  onClose: () => void;
+  className?: string;
+};
 
 /** Modal shell for an opened hotspot: dimmed backdrop, Escape / click-outside to close. */
-export function PanelFrame({ title, children, onClose }: PanelFrameProps) {
+export function PanelFrame({ title, children, onClose, className = "" }: PanelFrameProps) {
   const ref = useRef<HTMLElement>(null);
   const closeRef = useRef(onClose);
 
@@ -34,7 +39,7 @@ export function PanelFrame({ title, children, onClose }: PanelFrameProps) {
       <div className="panel-backdrop" onClick={onClose} />
       <section
         ref={ref}
-        className="hotspot-panel"
+        className={`hotspot-panel ${className}`}
         role="dialog"
         aria-modal="true"
         aria-label={title}
