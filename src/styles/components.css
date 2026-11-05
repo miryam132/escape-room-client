@@ -617,6 +617,24 @@
 .auth-form .form-field:last-of-type {
   margin-block-end: 1.4rem;
 }
+.demo-box {
+  margin-top: 1.4rem;
+  padding: 0.9rem 1rem 1rem;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-sm);
+}
+.demo-label {
+  margin: 0 0 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--signal);
+}
+.demo-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+}
 .auth-links {
   margin: 1rem 0 0;
   font-size: 0.95rem;

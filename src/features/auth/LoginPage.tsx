@@ -4,16 +4,20 @@ import { useForm } from "react-hook-form";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import Field from "../../components/common/Field";
 import { AuthLock } from "./AuthLock";
-import { errorMessage } from "../../api/client";
+import { ApiError, errorMessage } from "../../api/client";
 import { useAuth } from "./authContext";
+import { DEMO_ACCOUNTS } from "./demoAccounts";
+import type { DemoAccount } from "./demoAccounts";
 import { loginSchema } from "./schemas";
 import type { LoginValues } from "./schemas";
 
 export default function LoginPage() {
-  const { user, login } = useAuth();
+  const { user, login, register: registerUser } = useAuth();
   const navigate = useNavigate();
   const from = (useLocation().state as { from?: string } | null)?.from ?? "/rooms";
   const [feedback, setFeedback] = useState("");
+  const [demoBusy, setDemoBusy] = useState(false);
+  const [landing, setLanding] = useState<string | null>(null);
 
   const {
     register,
@@ -24,7 +28,7 @@ export default function LoginPage() {
     defaultValues: { email: "", password: "" },
   });
 
-  if (user) return <Navigate to={from} replace />;
+  if (user) return <Navigate to={landing ?? from} replace />;
 
   async function onSubmit({ email, password }: LoginValues) {
     setFeedback("");
@@ -33,6 +37,31 @@ export default function LoginPage() {
       navigate(from, { replace: true });
     } catch (error) {
       setFeedback(errorMessage(error, "ההתחברות נכשלה"));
+    }
+  }
+
+  /** One-click demo sign-in. A player account that does not exist yet is created on first use. */
+  async function demoLogin(account: DemoAccount) {
+    setFeedback("");
+    setDemoBusy(true);
+    setLanding(account.landing);
+    try {
+      try {
+        await login(account.email, account.password);
+      } catch (error) {
+        const invalid = error instanceof ApiError && error.code === "INVALID_CREDENTIALS";
+        if (!account.createIfMissing || !invalid) throw error;
+        await registerUser({
+          name: account.name,
+          email: account.email,
+          password: account.password,
+        });
+      }
+    } catch (error) {
+      setLanding(null);
+      setFeedback(errorMessage(error, "ההתחברות נכשלה"));
+    } finally {
+      setDemoBusy(false);
     }
   }
 
@@ -75,6 +104,23 @@ export default function LoginPage() {
 
           {feedback && <p role="alert">{feedback}</p>}
         </form>
+
+        <div className="demo-box">
+          <p className="demo-label">( חשבונות הדגמה לבדיקה )</p>
+          <div className="demo-buttons">
+            {Object.entries(DEMO_ACCOUNTS).map(([key, account]) => (
+              <button
+                key={key}
+                type="button"
+                className="btn btn-ghost btn-sm"
+                disabled={demoBusy || isSubmitting}
+                onClick={() => demoLogin(account)}
+              >
+                {account.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <p className="auth-links">
           <Link to="/forgot-password">שכחת סיסמה?</Link>
